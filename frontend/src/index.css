@@ -33,13 +33,9 @@
 .subject{
   display: inline-block;
   border-bottom: 1px solid rgb(206, 211, 206);
-  /* border-right: 1px solid rgb(206, 211, 206); */
   padding: 1.50rem 3rem 1.50rem 1.5rem;
   border-top: none;
   width: 100%;
-  /* background: rgb(240, 243, 240); */
-  /* background: rgb(228, 230, 230);
-  /* font-family: 'Shadows Into Light', cursive; */
 }
 .border-b{
   border-bottom: none;
@@ -57,8 +53,6 @@ a{
 }
 .flex-c a{
   color: black;
-  /* color: rgb(41, 72, 129); */
-  /* font-weight: bold; */
 }
 .flex-c a:hover{
   background: rgb(178, 179, 178);
@@ -68,18 +62,11 @@ a{
 #welcome, #app-title{
   flex-basis: 50%;
 }
-/* #app-title{
-  font-family: 'Shadows Into Light', cursive;
-} */
 #welcome{
   text-align: right;
 }
 .bg-img{
-  /* background-image: url('/public/mathbg.jpg');
-  background-size: cover; */
-  /* background: rgb(70, 117, 218); */
   background: black;
-  /* background: linear-gradient(to right,  rgb(65, 187, 65), rgb(25, 151, 25) ); */
 }
 #has-acct{
   display: none;
