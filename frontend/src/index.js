@@ -1,23 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import React from 'react'
+import thunkMiddleware from 'redux-thunk'
+import { createLogger } from 'redux-logger'
+import ReactDOM from 'react-dom'
+import App from './App'
+import { createStore, applyMiddleware } from 'redux'
+import { Provider } from 'react-redux'
+import mathApp from './reducers/reducers'
 import './index.css';
-// import App from './App';
-import Home from './components/home';
-import Error from './components/error';
-import Test from './components/test';
 
-const Routeit = () => {
-  return (
-    <BrowserRouter>
-        <Switch>
-          <Route exact path="/" render={() => <Redirect to="/test"/>}/>
-          <Route path="/home" component={Home}/>
-          <Route path='/test' component={Test}/>
-          <Route component={Error} />
-        </Switch>
-    </BrowserRouter>
-  );
-}
+const loggerMiddleware = createLogger()
 
-ReactDOM.render(<Routeit />, document.getElementById('root'));
+const store = createStore(mathApp, applyMiddleware(
+    thunkMiddleware, // lets us dispatch() functions
+    loggerMiddleware // neat middleware that logs actions
+  )
+)
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>, 
+  document.getElementById("root")
+)
