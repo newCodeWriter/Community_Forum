@@ -4,8 +4,7 @@ export const userAuth = {
     loggedIn: loggedIn,
     isTokenExpired: isTokenExpired,
     getUser: getUser,
-    getToken: getToken, 
-    logout: logout
+    getToken: getToken
 }
 
 function loggedIn(){ 
@@ -29,17 +28,8 @@ function isTokenExpired(token) {
     }
 }
 
-// function setToken(token_name, token){
-//     localStorage.setItem(token_name, JSON.stringify(token))
-// }
-
 function getToken(){
     return localStorage.getItem('token')
-}
-
-function logout(){
-    localStorage.removeItem('token')
-    return console.log('You are now logged out.')
 }
 
 function getUser(){
