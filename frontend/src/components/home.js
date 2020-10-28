@@ -15,8 +15,9 @@ function Home({ userLogout, match }){
     let history = useHistory();
 
     function handleLogout(){
-        userLogout()
-        history.push('/login');
+        userLogout();
+        history.replace('/login');
+        // window.location.reload();
     }
     
     return(

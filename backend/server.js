@@ -121,7 +121,7 @@ app.post('/login', async (req, res) =>{
                         if(bool){
                             // create access token for user
                             const user = {name: username};
-                            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 120 });
+                            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 900 });
                             res.json({accessToken: accessToken});
                         }
                         else{

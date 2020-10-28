@@ -32,3 +32,9 @@
 .log-link, #has-acct{
   cursor: pointer;
 }
+a{
+  text-decoration: none !important;
+}
+.subject-container:hover{
+  background-color: rgb(236, 238, 240) !important;
+}
