@@ -22,6 +22,17 @@ class Login extends Component {
         };
         this.handleLogin = this.handleLogin.bind(this)
     }
+
+    componentDidUpdate(prevProps) {
+        if(this.props.text !== prevProps.text) {
+          if(this.props.status === 400){
+            this.setState({log_user_error: this.props.text})
+          }
+          else{
+            this.setState({log_pwd_error: this.props.text})
+          }
+        }
+      }
     
     handleInputChange = (event) => {
 
@@ -73,16 +84,6 @@ class Login extends Component {
             password: this.state.log_pwd
         }
         this.props.dispatch(loginUser(data));
-
-        // if(this.props.isAuthenticated === false){
-        //     if(this.props.status === 404){
-        //         this.setState({log_user_error: 'This user does not exist'})
-        //     }
-        //     else{
-
-        //         this.setState({log_pwd_error: 'You entered an incorrect password.'})
-        //     }
-        // }
     }
 
     render() {
@@ -102,14 +103,14 @@ class Login extends Component {
                                     <div className="input-group">
                                         <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} minLength="4" required disabled />
                                     </div>
-                                    <div className="text-danger small">{this.state.reg_user_error}</div>
+                                    <div className="text-danger small errors">{this.state.reg_user_error}</div>
                                     <div className="input-group mt-3">
                                         <input type="password" className="form-control reg" name="reg_pwd1" id="reg_pwd1" placeholder="Password" onChange={this.handleInputChange} minLength="8" required disabled />
                                     </div>
                                     <div className="input-group mt-3">
                                         <input type="password" className="form-control reg" name="reg_pwd2" id="reg_pwd2" placeholder="Confirm Password" onChange={this.handleInputChange} minLength="8" required disabled />
                                     </div>
-                                    <div className="text-danger small">{this.state.reg_pwd_error}</div>
+                                    <div className="text-danger small errors">{this.state.reg_pwd_error}</div>
                                     <div className="form-check mt-2">
                                         <label htmlFor="terms" className="form-check-label small">
                                             <input type="checkbox" name="terms" id="terms" className="form-check-input reg" onChange={this.handleInputChange} disabled required />
@@ -130,14 +131,14 @@ class Login extends Component {
                                         </div>
                                         <input type="text" className="form-control log" onChange={this.handleInputChange} name="log_user" id="log_user" placeholder="Username" minLength="4" required />
                                     </div>
-                                    <div className="text-danger small">{this.state.log_user_error}</div>
+                                    <div className="text-danger small errors">{this.state.log_user_error}</div>
                                     <div className="input-group mt-3">
                                         <div className="input-group-prepend">
                                             <div className="input-group-text bg-primary text-light"><i className="fas fa-key"></i></div>
                                         </div>
                                         <input type="password" className="form-control log" onChange={this.handleInputChange} name="log_pwd" id="log_pwd" placeholder="Password" minLength="8" required />
                                     </div>
-                                    <div className="text-danger small">{this.state.log_pwd_error}</div>
+                                    <div className="text-danger small errors">{this.state.log_pwd_error}</div>
                                     <div className="form-check mt-2">
                                         <label htmlFor="remember" className="form-check-label small">
                                             <input type="checkbox" name="remember" id="remember" className="form-check-input log" value="" />Remember me |
@@ -156,9 +157,13 @@ class Login extends Component {
     }
 }
 
-const mapStateToProps = (state) => ({ 
-    isAuthenticated: state.authentication.isAuthenticated,
-    status: state.authentication.status
-});
+const mapStateToProps = (state) => { 
+    const { authentication } = state
+    return{
+        status: authentication.status,
+        text: authentication.statusText,
+        isAuth: authentication.isAuthenticated
+    }
+};
   
 export default connect(mapStateToProps, null)(Login);

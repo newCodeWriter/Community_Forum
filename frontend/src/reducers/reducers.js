@@ -7,35 +7,39 @@ const userInfo = {
     isAuthenticated: false, 
     token: null,
     userName: null,
-    loggedIn: false
+    loggedIn: false, 
+    statusText: null
 }
 
 const authentication = (state = userInfo, action) => {
     switch (action.type) {
         case LOGIN_USER_SUCCESS:
-            return Object.assign({}, state, {
+            return {...state,
                 isAuthenticated: true, 
                 token: action.payload.token,
                 userName: decode(action.payload.token).name,
                 loggedIn: true,
                 statusText: 'You have been successfully logged in.'
-            })
+            }
         case LOGIN_USER_FAILURE:
-            return Object.assign({}, state, {
+            return {...state,
                 isAuthenticated: false, 
                 token: null,
                 userName: null,
                 loggedIn: false,
+                statusText: action.payload.status === 400
+                            ? 'This user does not exist.' 
+                            : 'You have entered an incorrect password',
                 status: action.payload.status
-            })
+            }
         case LOGOUT_USER:
-            return Object.assign({}, state, {
+            return {...state,
                 isAuthenticated: false, 
                 token: null,
                 userName: null,
                 loggedIn: false,
                 statusText: 'You have been successfully logged out.'
-            })
+            }
         case GET_AUTH:
             return {...state, loggedIn: userAuth.loggedIn()}
         default:
