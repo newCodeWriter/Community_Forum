@@ -73,8 +73,19 @@ app.get('/users', (req, res) => {
     console.log('it is done');
 });
 
-app.get('/mother', (req, res) => {
-    res.redirect('/');
+app.get('/category/:category', (req, res) => {
+    const sql = `SELECT username, new_question, answers, DATE_FORMAT(question_date, "%b %e '%y at %l:%i %p") AS date FROM (SELECT question AS new_question, COUNT(response) AS answers FROM Questions LEFT JOIN Responses USING (question_id) WHERE category= ? GROUP BY question) dream INNER JOIN Questions ON dream.new_question = Questions.question INNER JOIN Users USING (user_id)`;
+    connection.query(sql, [req.params.category], (err, rows) => {
+        if(err) throw err;
+        else{
+            if(rows.length === 0){
+                res.sendStatus(404)
+            }
+            else{
+                res.send(rows)
+            }
+        }
+    })
 });
 
 app.post('/register', async (req, res) => {
@@ -109,7 +120,7 @@ app.post('/login', async (req, res) =>{
     connection.query(user_query, [req.body.username], (err, rows) => {
         if(err) throw err;
         else{
-            if(rows.length == 0){
+            if(rows.length === 0){
                 res.sendStatus(400)
             }
             else{
@@ -134,10 +145,6 @@ app.post('/login', async (req, res) =>{
     })
 })
 
-const posties = [
-    {username: "jasmine", title: "Post 1"},
-    {username: "kimberly", title: "Post 2"}
-]
 
 // middleware to verify user's access token
 authenticateToken = (req, res, next) => {
