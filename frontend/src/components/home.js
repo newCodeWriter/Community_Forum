@@ -2,8 +2,10 @@ import React from 'react'
 import Button from 'react-bootstrap/Button'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
-import { Route } from "react-router-dom"
+import { Route, Switch } from "react-router-dom"
 import Subject from './subject'
+import Question from './question'
+import Post from './post'
 import { math } from '../constants'
 import { connect } from 'react-redux'
 import { logout } from '../actions'
@@ -40,12 +42,17 @@ function Home({ userLogout, match }){
                     </Nav>
                 </div>
                 <div className="col-md-9">
-                    <Route path={`${match.path}/:subjectId`} component={Subject} />
+                    <Switch>
+                        <Route path={`${match.path}/:subjectId/question`} component={Question} />
+                        <Route path={`${match.path}/:subjectId/post`} component={Post} />
+                        <Route path={`${match.path}/:subjectId`} component={Subject} />
+                    </Switch>
                 </div>
             </div>
         </div>
     )
 }
+
 
 const mapDispatchToProps = (dispatch) => ({
     userLogout: () => {
