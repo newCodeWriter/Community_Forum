@@ -37,4 +37,5 @@ a{
 }
 .subject-container:hover{
   background-color: rgb(236, 238, 240) !important;
+  cursor: pointer;
 }
