@@ -1,4 +1,4 @@
-import { LOGIN_USER_SUCCESS, LOGIN_USER_FAILURE, LOGOUT_USER, FETCH_DATA, GET_AUTH } from '../constants';
+import { LOGIN_USER_SUCCESS, LOGIN_USER_FAILURE, LOGOUT_USER, FETCH_DATA, GET_AUTH, FETCH_CATEGORY_INFO } from '../constants';
 import { combineReducers } from 'redux'
 import decode from 'jwt-decode'
 import { userAuth } from '../checkAuth'
@@ -53,6 +53,11 @@ const data_request = (state = [], action) => {
             return [
                 ...state,
                 action.payload.data
+            ]
+        case FETCH_CATEGORY_INFO:
+            return [
+                ...state, 
+                action.payload
             ]
         default:
             return state
