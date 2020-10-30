@@ -22,9 +22,13 @@
 .flex-c a{
   color: black;
 }
-.flex-c a:hover{
+.active-link{
   background: #0275d8;
-  color: white;
+  color: white !important;
+}
+.flex-c a:hover{
+  background: #b5b7b9;
+  color: white !important;
 }
 #has-acct{
   display: none;
