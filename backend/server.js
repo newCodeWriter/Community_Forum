@@ -74,7 +74,7 @@ app.get('/users', (req, res) => {
 });
 
 app.get('/category/:category', (req, res) => {
-    const sql = `SELECT username, new_question, answers, DATE_FORMAT(question_date, "%b %e '%y at %l:%i %p") AS date FROM (SELECT question AS new_question, COUNT(response) AS answers FROM Questions LEFT JOIN Responses USING (question_id) WHERE category= ? GROUP BY question) dream INNER JOIN Questions ON dream.new_question = Questions.question INNER JOIN Users USING (user_id)`;
+    const sql = `SELECT username, question_id, new_question, answers, DATE_FORMAT(question_date, "%b %e '%y at %l:%i %p") AS date FROM (SELECT question AS new_question, COUNT(response) AS answers FROM Questions LEFT JOIN Responses USING (question_id) WHERE category= ? GROUP BY question) dream INNER JOIN Questions ON dream.new_question = Questions.question INNER JOIN Users USING (user_id)`;
     connection.query(sql, [req.params.category], (err, rows) => {
         if(err) throw err;
         else{
@@ -83,6 +83,32 @@ app.get('/category/:category', (req, res) => {
             }
             else{
                 res.send(rows)
+            }
+        }
+    })
+});
+
+app.put('/question', (req, res) => {
+    const sql = `INSERT INTO Questions (user_id, category, question) VALUES(?, ?, ?)`;
+    const subjects = ['algebra', 'arithmetic', 'calculus', 'differential', 'discrete', 'geometry', 'logic', 'number', 'statistics', 'trigonometry']
+    const que = `SELECT user_id FROM Users WHERE username = ?`
+    // first, get user id
+    connection.query(que, [req.body.user], (err, rows) => {
+        if(err) throw err;
+        else{
+            const user_id = rows[0].user_id;
+            const values = [user_id, req.body.category, req.body.question];
+            if(subjects.includes(req.body.category)){
+                connection.query(sql, values, (err, rows) => {
+                    if(err) throw err;
+                    else{
+                        res.send('Your question has been submitted.')
+                        console.log('Question submitted.')
+                    }
+                })
+            }
+            else{
+                res.sendStatus(400)
             }
         }
     })
