@@ -16,7 +16,7 @@ class App extends Component{
 
   render() {
     return (
-      <BrowserRouter>
+      <BrowserRouter forceRefresh={true}>
         <div>
           <Switch>
             <Route exact path="/" render={() => <Redirect to="/login"/>}/>
