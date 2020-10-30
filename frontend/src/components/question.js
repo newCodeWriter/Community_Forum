@@ -3,9 +3,9 @@ import React, { useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom';
+import { userAuth } from '../checkAuth';
 
 export default function Question({match}){
-    // const subject = math.find(({ id }) => id === match.params.subjectId)
     const [ error, setError ] = useState({
         mark: '',
         length: ''
@@ -16,12 +16,16 @@ export default function Question({match}){
     function handleForm(event){
         event.preventDefault();
         let text = document.getElementById('question').value; 
+        let user = userAuth.getUser();
+        let data = {
+            user: user, 
+            category: match.params.subjectId, 
+            question: text
+        }
         if(text.endsWith('?') && text.length >= 10){
-            axios.post('/question', {question: text})
-            .then(history.replace('/home'))
-            .catch(err => {
-                console.log(err)
-            })
+            axios.put('/question', data)
+            .then(history.goBack())
+            .catch(console.error())
         }
         else if(!text.endsWith('?') && text.length < 10){
             setError({mark: 'Your question does not end with a "?"', 
@@ -45,7 +49,6 @@ export default function Question({match}){
         setError({mark: '', 
                 length: ''})
     }
-
 
     return (
         <div className="mt-5 w-75 mx-auto">

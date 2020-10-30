@@ -41,13 +41,13 @@ class Subject extends Component {
                     <div key={key} onClick={this.handleClick} className="border border-light bg-light d-block mb-3 p-3 subject-container">
                         <div className="row">
                             <div className="col-md-4 text-muted small">{subject.date}</div>
-                            <div className="col-md-8 text-primary text-right">By: {subject.username}</div>
+                            <div className="col-md-8 text-success text-right small">by: {subject.username}</div>
                         </div>
                         <div className="row mt-3 w-100">
                             <div className="col">{subject.new_question}</div>
                         </div>
                         <div className="row mt-2 text-muted">
-                            <div className="col text-right">Answers: {subject.answers}</div>
+                            <div className="col text-right small">Answers: {subject.answers}</div>
                         </div>
                     </div>
                 ))}
