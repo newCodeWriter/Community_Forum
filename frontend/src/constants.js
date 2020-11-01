@@ -3,7 +3,6 @@ export const LOGIN_USER_FAILURE = "LOGIN_USER_FAILURE";
 export const LOGIN_USER_SUCCESS = "LOGIN_USER_SUCCESS";
 export const LOGOUT_USER = "LOGOUT_USER";
 export const FETCH_DATA = "FETCH_DATA";
-export const FETCH_CATEGORY_INFO = "FETCH_CATEGORY_INFO";
 export const GET_AUTH = "GET_AUTH";
 
 export const math = [

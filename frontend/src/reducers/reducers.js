@@ -1,4 +1,4 @@
-import { LOGIN_USER_SUCCESS, LOGIN_USER_FAILURE, LOGOUT_USER, FETCH_DATA, GET_AUTH, FETCH_CATEGORY_INFO } from '../constants';
+import { LOGIN_USER_SUCCESS, LOGIN_USER_FAILURE, LOGOUT_USER, FETCH_DATA, GET_AUTH } from '../constants';
 import { combineReducers } from 'redux'
 import decode from 'jwt-decode'
 import { userAuth } from '../checkAuth'
@@ -8,7 +8,8 @@ const userInfo = {
     token: null,
     userName: null,
     loggedIn: false, 
-    statusText: null
+    statusText: null,
+    loginAttempts: 0
 }
 
 const authentication = (state = userInfo, action) => {
@@ -30,6 +31,7 @@ const authentication = (state = userInfo, action) => {
                 statusText: action.payload.status === 400
                             ? 'This user does not exist.' 
                             : 'You have entered an incorrect password',
+                loginAttempts: action.payload.attempts,
                 status: action.payload.status
             }
         case LOGOUT_USER:
@@ -41,7 +43,9 @@ const authentication = (state = userInfo, action) => {
                 statusText: 'You have been successfully logged out.'
             }
         case GET_AUTH:
-            return {...state, loggedIn: userAuth.loggedIn()}
+            return {...state, 
+                isAuthenticated: userAuth.loggedIn(), 
+                loggedIn: userAuth.loggedIn()}
         default:
             return state
     }
@@ -52,11 +56,6 @@ const data_request = (state = [], action) => {
         case FETCH_DATA:
             return [
                 ...state,
-                action.payload.data
-            ]
-        case FETCH_CATEGORY_INFO:
-            return [
-                ...state, 
                 action.payload
             ]
         default:
