@@ -22,18 +22,14 @@
 .flex-c a{
   color: black;
 }
-.active-link{
+.flex-c a:hover, .active-link{
   background: #0275d8;
-  color: white !important;
-}
-.flex-c a:hover{
-  background: #b5b7b9;
   color: white !important;
 }
 #has-acct{
   display: none;
 }
-.log-link, #has-acct{
+.log-link, #has-acct, .fas{
   cursor: pointer;
 }
 a{
@@ -41,5 +37,10 @@ a{
 }
 .subject-container:hover{
   background-color: rgb(236, 238, 240) !important;
-  cursor: pointer;
+}
+.reg-error{
+  list-style-position: inside;
+}
+.tryit{
+  white-space: pre-line;
 }
