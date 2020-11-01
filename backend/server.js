@@ -2,53 +2,13 @@ const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt'); // to hash passwords
 const jwt = require('jsonwebtoken');
-require('dotenv').config()
-const session = require('express-session');
+const config = require('./config.js')
 const port = 4000;
-
-app.use(session({
-    secret: 'jdfd#lf3sdkrskww9#2hd%ew3s3ws285sewqr',
-    resave: false, 
-    saveUninitialized: true
-}))
-
 const bodyParser = require('body-parser');
+require('dotenv').config()
 
-const users = [{name: 'shay'}, {name: 'joe'}]
-
-const mysql = require('mysql');     //create a separate file and hide this information
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '$afrodite@89',
-    database: 'nodejs',
-    multipleStatements: true
-})
-
-// functions
-
-// getUsers = (person) => {
-//     const user_query = `SELECT username FROM Users`;
-//     var user_list;
-//     connection.query(user_query, (err, results) => {
-//         // if(err) throw err
-//         user_list = results
-//         if(user_list.find(user => user.username === person)){
-//             // res.status(201).send("we found the user")
-//             return true
-//         }
-//         else{
-//             return false
-//         }
-//     })
-// }
-
-// app.get('/cool', async (req, res) => {
-//     let p = 'joseph'
-//     getUsers(p)
-
-// })
-
+const mysql = require('mysql');  
+const connection = mysql.createConnection(config)
 connection.connect(function(err){
     if(err) {
       return console.error('error: ' + err.message);
@@ -56,41 +16,33 @@ connection.connect(function(err){
     console.log('Connected to the MySQL server.');
 });
 
-// var sql = `SELECT * FROM contacts`;
-
-// connection.query(sql, function(err, result){
-//     if (err) throw err;
-//     console.log(result)
-// })
-
-// connection.end()
-
 app.use(express.json()) // so that application can accept JSON
 app.use(bodyParser.urlencoded({ extended: true })); //use body-parser as middleware to process form data sent in the body of a POST request
 
-app.get('/users', (req, res) => {
-    res.json(users);
-    console.log('it is done');
-});
+const subjects = ['algebra', 'arithmetic', 'calculus', 'differential', 'discrete', 'geometry', 'logic', 'number', 'statistics', 'trigonometry']
 
-app.get('/category/:category', (req, res) => {
+app.get('/category/:category', async (req, res) => {
     const sql = `SELECT username, question_id, new_question, answers, DATE_FORMAT(question_date, "%b %e '%y at %l:%i %p") AS date FROM (SELECT question AS new_question, COUNT(response) AS answers FROM Questions LEFT JOIN Responses USING (question_id) WHERE category= ? GROUP BY question) dream INNER JOIN Questions ON dream.new_question = Questions.question INNER JOIN Users USING (user_id)`;
-    connection.query(sql, [req.params.category], (err, rows) => {
-        if(err) throw err;
-        else{
-            if(rows.length === 0){
-                res.sendStatus(404)
-            }
+    if(subjects.includes(req.params.category)){
+        connection.query(sql, [req.params.category], (err, rows) => {
+            if(err) throw err;
             else{
-                res.send(rows)
+                if(rows.length === 0){
+                    res.sendStatus(404)
+                }
+                else{
+                    res.send(rows)
+                }
             }
-        }
-    })
+        })
+    }
+    else{
+        res.sendStatus(400)
+    }
 });
 
-app.put('/question', (req, res) => {
-    const sql = `INSERT INTO Questions (user_id, category, question) VALUES(?, ?, ?)`;
-    const subjects = ['algebra', 'arithmetic', 'calculus', 'differential', 'discrete', 'geometry', 'logic', 'number', 'statistics', 'trigonometry']
+app.put('/question', async (req, res) => {
+    const sql = `INSERT INTO Questions(user_id, category, question) VALUES(?, ?, ?)`;
     const que = `SELECT user_id FROM Users WHERE username = ?`
     // first, get user id
     connection.query(que, [req.body.user], (err, rows) => {
@@ -113,6 +65,92 @@ app.put('/question', (req, res) => {
         }
     })
 });
+
+app.get('/post/:questionId', async (req, res) => {
+    const sql = `SELECT submit_user, question_id, question, question_date, answer_user, response_id, response, response_date FROM (SELECT question_id, username AS submit_user, question, DATE_FORMAT(question_date,"%b %e '%y at %l:%i %p") AS question_date FROM Questions INNER JOIN Users USING (user_id) WHERE question_id = ?) AS user_question INNER JOIN (SELECT question_id, username AS answer_user, id AS response_id, response, DATE_FORMAT(response_date, "%b %e '%y at %l:%i %p") AS response_date FROM Responses INNER JOIN Users USING (user_id) WHERE question_id = ?) AS answers USING (question_id);`
+    // const sql = `SELECT username AS answer_user, response, DATE_FORMAT(response_date, "%b %e '%y at %l:%i %p") AS response_date FROM Responses INNER JOIN Users USING (user_id) WHERE question_id = ?`
+    connection.query(sql, [req.params.questionId, req.params.questionId], (err, rows) => {
+        if(err) throw err; 
+        else{
+            const no_answer = `SELECT username as submit_user, question_id, question, DATE_FORMAT(question_date,"%b %e '%y at %l:%i %p") AS question_date FROM Questions INNER JOIN Users USING (user_id) WHERE question_id = ?`
+            if(rows.length === 0){
+                connection.query(no_answer, [req.params.questionId], (err, row) => {
+                    if(err) throw err; 
+                    else{
+                        res.send(row)
+                    }
+                })
+            }
+            else{
+                res.send(rows)
+            }
+        }
+    })
+})
+
+app.put('/update/question/:questionId', async (req, res) => {
+    const sql = `UPDATE Questions SET question = ? WHERE question_id = ?`;
+    const { update } = req.body;
+    connection.query(sql, [update, req.params.questionId], (err, result) => {
+        if(err) throw err; 
+        else{
+            res.send('It is a success')
+        }
+    })
+})
+
+app.put('/update/answer/:answerId', async (req, res) => {
+    const { update } = req.body;
+    const sql = `UPDATE Responses SET response = ? WHERE id = ?`;
+    connection.query(sql, [update, req.params.answerId], (err, result) => {
+        if(err) throw err;
+        else{
+            res.send('It is a success')
+        }
+    })
+})
+
+app.post('/answer', async (req, res) => {
+    const get_user_id = `SELECT user_id FROM Users WHERE username = ?`;
+    const add_answer = `INSERT INTO Responses(user_id, question_id, response) VALUES(?, ?, ?) ` 
+    connection.query(get_user_id, [req.body.user], (err, row) => {
+        if(err) throw err; 
+        else{
+            const userId = row[0].user_id;
+            const values = [userId, req.body.id, req.body.answer]
+            connection.query(add_answer, values, (err, row) => {
+                if(err) throw err; 
+                else{
+                    res.send('Your answer has been submitted.')
+                    console.log('Answer submitted.')
+                }
+            })
+            
+        }
+    })
+})
+
+app.delete('/delete/question/:questionId', (req, res) => {
+    const sql = `DELETE FROM Questions WHERE question_id = ?`;
+    connection.query(sql, [req.params.questionId],(err, result) => {
+        if(err) throw err; 
+        else{
+            res.send('Your delete request has been processed.')
+            console.log('Deleted Row(s):', result.affectedRows)
+        }
+    })
+})
+
+app.delete('/delete/answer/:answerId', (req, res) => {
+    const sql = `DELETE FROM Responses WHERE id = ?`;
+    connection.query(sql, [req.params.answerId],(err, result) => {
+        if(err) throw err; 
+        else{
+            res.send('Your delete request has been processed.')
+            console.log('Deleted Row(s):', result.affectedRows)
+        }
+    })
+})
 
 app.post('/register', async (req, res) => {
     try{
@@ -171,7 +209,6 @@ app.post('/login', async (req, res) =>{
     })
 })
 
-
 // middleware to verify user's access token
 authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization']
@@ -184,55 +221,6 @@ authenticateToken = (req, res, next) => {
     })
 
 }
-
-// endpoint where user can view all of their submitted posts
-app.get('/post', authenticateToken, (req, res) => {
-   res.json(posties.filter(post => post.username === req.user.name))
-   
-})
-
-    // const query = `SELECT category, question, question_date FROM Questions WHERE user_id = ?`;
-    // connection.query(query, [req.user_id], (err, rows) => {
-    //     if(err) throw err;
-    //     res.send('here are all your post.')
-        // const posts = rows.filter(row => row.category)
-    // })
-
-
-// app.get('/quotes', function(req, res){
-//     if(req.query.year){
-//         res.send("Return a list of quotes from the year: " + req.query.year);
-//       }
-//     else{
-//           res.json(quotes);
-//       }
-// });
-
-// app.get('/quotes/:id', function(req, res){
-//     console.log("return quote with the ID: " + req.params.id);
-//     // res.send("Return quote with the ID: " + req.params.id);
-//     var sql = `SELECT * FROM contacts WHERE id = ?`
-//     connection.query(sql, [req.params.id], function(err, row){
-//         if(err){
-//             console.log(err.message);
-//         }
-//         else{
-//             res.json(row);
-//         }
-//     });
-// });
-
-// app.post('/quotes', function(req, res){
-//     console.log("Insert a new record for: " + req.body.fname);
-//     connection.query(`INSERT INTO contacts (first_name, last_name, age) VALUES(?, ?, ?)`, [req.body.fname, req.body.lname, req.body.age], function(err, result){
-//         if(err){
-//             console.log(err.message);
-//         }
-//         else{
-//             res.send('Inserted new record with id: ' + result.insertId);
-//         }
-//     })
-// });
 
 app.listen(port, () => {
     console.log('Express app listening on port ' + port);
