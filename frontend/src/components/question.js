@@ -57,13 +57,13 @@ export default function Question({match}){
                     <div className="col">
                         <div className="text-danger small">{error.mark}</div>
                         <div className="mb-2 text-danger small">{error.length}</div>
-                        <label htmlFor="question" className="d-block">User, enter your question:</label>
+                        <label htmlFor="question" className="d-block">{userAuth.getUser().toUpperCase()}, enter your question:</label>
                         <textarea id="question" name="question" className="p-3 mb-4" onChange={handleTextChange} rows="7" cols="56" required autoFocus></textarea>
                     </div>
                 </div>
             </form>
             <Button form="question_form" variant="primary" type="submit" onClick={handleForm} className="p-2 mr-3">Submit Question</Button>
-            <Button variant="secondary" type="button" onClick={handleReturn} className="p-2"><a>Back to Questions</a></Button>
+            <Button variant="secondary" type="button" onClick={handleReturn} className="p-2">Back to Questions</Button>
         </div>
     )
 };
