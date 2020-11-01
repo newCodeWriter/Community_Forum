@@ -28,13 +28,13 @@ function Home({ userLogout, match }){
                     <Navbar.Brand href={`${match.url}`} id="math">MathQue</Navbar.Brand>
                 </Nav>
                 <Nav className="ml-auto">
-                    <Nav.Link href="home/"><i className="fas fa-user-alt"></i> Welcome, {userAuth.getUser()}</Nav.Link>
+                    <Nav.Link href="home/"><i className="fas fa-user-alt"></i> Welcome, {userAuth.getUser().toUpperCase()}</Nav.Link>
                     <Button variant="primary" onClick={handleLogout}>Logout</Button>
                 </Nav>
             </Navbar>
             <div className="row w-100">
                 <div className="col-md-3">
-                    <Nav className="flex-column flex-c" activeKey={`${match.url}/:subjectId`} >
+                    <Nav className="flex-column flex-c">
                         {math.map(({ name, id }) => (
                             <NavLink key={id} to={`${match.url}/${id}`} activeClassName="active-link" className="pt-4 pb-4 pl-3 border-bottom">{name}</NavLink>
                         ))}
@@ -43,7 +43,7 @@ function Home({ userLogout, match }){
                 <div className="col-md-9">
                     <Switch>
                         <Route path={`${match.path}/:subjectId/question`} component={Question} />
-                        <Route path={`${match.path}/:subjectId/post`} component={Post} />
+                        <Route path={`${match.path}/:subjectId/:questionId`} component={Post} />
                         <Route path={`${match.path}/:subjectId`} component={Subject} />
                     </Switch>
                 </div>
