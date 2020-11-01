@@ -11,12 +11,12 @@ class Login extends Component {
             reg_user: '',
             reg_pwd1: '',
             reg_pwd2: '',
-            reg_confirmed: '',
-            reg_user_error: '',
-            reg_pwd_error: '',
-            log_user_error: '',
-            log_pwd_error: '',
-            terms: false,
+            reg_confirmed: false,
+            reg_user_error: false,
+            reg_pwd_error: false,
+            reg_pwd_test_error: false,
+            log_user_error: false,
+            log_pwd_error: false,
             log_user: '',
             log_pwd: ''
         };
@@ -24,15 +24,15 @@ class Login extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(this.props.text !== prevProps.text) {
+        if(this.props.attempts !== prevProps.attempts) {
           if(this.props.status === 400){
-            this.setState({log_user_error: this.props.text})
+            this.setState({log_user_error: true})
           }
-          else{
-            this.setState({log_pwd_error: this.props.text})
+          else {
+            this.setState({log_pwd_error: true})
           }
         }
-      }
+    }
     
     handleInputChange = (event) => {
 
@@ -41,13 +41,21 @@ class Login extends Component {
         const val = target.type === 'checkbox' ? target.checked : target.value; 
         
         this.setState({[name]: val});
-        this.setState({reg_user_error: '', reg_pwd_error: '', log_user_error: '', log_pwd_error: '', reg_confirmed: ''})
+        this.setState({
+            reg_user_error: false, 
+            reg_pwd_test_error: false, 
+            reg_pwd_match_error: false, 
+            log_user_error: false, 
+            log_pwd_error: false, 
+            reg_confirmed: false
+        })
     }
 
     handleRegister = (event) => {
         event.preventDefault();
-        
-        if(this.state.reg_pwd1 === this.state.reg_pwd2){
+        const patt = new RegExp("(?=.*[A-Za-z])(?=.*[0-9])(?=.*[@$!%*#?&]).{8,}");
+        const pwd_test = patt.test(this.state.reg_pwd1);
+        if(pwd_test && this.state.reg_pwd1 === this.state.reg_pwd2){
             var new_user = {
                 user: this.state.reg_user,
                 password: this.state.reg_pwd1
@@ -72,8 +80,15 @@ class Login extends Component {
                 }
             })
         }
+        else if(!pwd_test && this.state.reg_pwd1 !== this.state.reg_pwd2){
+            this.setState({reg_pwd_match_error: true});
+            this.setState({reg_pwd_test_error: true});
+        }
+        else if(!pwd_test){
+            this.setState({reg_pwd_test_error: true});
+        }
         else{
-            this.setState({reg_pwd_error: 'The two passwords do not match.'})
+            this.setState({reg_pwd_match_error: true});
         }
     }
 
@@ -103,14 +118,31 @@ class Login extends Component {
                                     <div className="input-group">
                                         <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} minLength="4" required disabled />
                                     </div>
-                                    <div className="text-danger small errors">{this.state.reg_user_error}</div>
+                                    {this.state.reg_user_error
+                                    ? <div className="text-danger small errors">This user already exists. Please try another username.</div>
+                                    : <div></div>
+                                    }
                                     <div className="input-group mt-3">
-                                        <input type="password" className="form-control reg" name="reg_pwd1" id="reg_pwd1" placeholder="Password" onChange={this.handleInputChange} minLength="8" required disabled />
+                                        <input type="password" className="form-control reg" name="reg_pwd1" id="reg_pwd1" placeholder="Password" onChange={this.handleInputChange} required disabled />
                                     </div>
+                                    {/* <div className="text-danger small errors">{this.state.reg_pwd_test_error}</div> */}
+                                    { this.state.reg_pwd_test_error 
+                                    ? <ul className="text-danger small errors">
+                                        Your password must contain: 
+                                        <li className="reg-error">At least eight characters</li>
+                                        <li className="reg-error">At least one letter</li>
+                                        <li className="reg-error">At least one number</li>
+                                        <li className="reg-error">At least one special character</li>
+                                    </ul>
+                                    : <div></div>
+                                    }
                                     <div className="input-group mt-3">
-                                        <input type="password" className="form-control reg" name="reg_pwd2" id="reg_pwd2" placeholder="Confirm Password" onChange={this.handleInputChange} minLength="8" required disabled />
+                                        <input type="password" className="form-control reg" name="reg_pwd2" id="reg_pwd2" placeholder="Confirm Password" onChange={this.handleInputChange} required disabled />
                                     </div>
-                                    <div className="text-danger small errors">{this.state.reg_pwd_error}</div>
+                                    {this.state.reg_pwd_match_error
+                                    ? <div className="text-danger small errors">Your passwords do not match.</div>
+                                    : <div></div>
+                                    }
                                     <div className="form-check mt-2">
                                         <label htmlFor="terms" className="form-check-label small">
                                             <input type="checkbox" name="terms" id="terms" className="form-check-input reg" onChange={this.handleInputChange} disabled required />
@@ -131,22 +163,23 @@ class Login extends Component {
                                         </div>
                                         <input type="text" className="form-control log" onChange={this.handleInputChange} name="log_user" id="log_user" placeholder="Username" minLength="4" required />
                                     </div>
-                                    <div className="text-danger small errors">{this.state.log_user_error}</div>
+                                    {this.state.log_user_error
+                                    ? <div className="text-danger small errors">This user does not exist.</div>
+                                    : <div></div>
+                                    }
                                     <div className="input-group mt-3">
                                         <div className="input-group-prepend">
                                             <div className="input-group-text bg-primary text-light"><i className="fas fa-key"></i></div>
                                         </div>
                                         <input type="password" className="form-control log" onChange={this.handleInputChange} name="log_pwd" id="log_pwd" placeholder="Password" minLength="8" required />
                                     </div>
-                                    <div className="text-danger small errors">{this.state.log_pwd_error}</div>
-                                    <div className="form-check mt-2">
-                                        <label htmlFor="remember" className="form-check-label small">
-                                            <input type="checkbox" name="remember" id="remember" className="form-check-input log" value="" />Remember me |
-                                            <div id="forgot" className="log-link d-inline text-primary"> Forgot Password?</div>
-                                        </label>
-                                    </div>
+                                    {this.state.log_pwd_error
+                                    ? <div className="text-danger small errors">You entered an incorrect password.</div>
+                                    : <div></div>
+                                    }
+                                    <div id="forgot" className="log-link mt-2 d-inline text-primary small"> Forgot Password?</div>
                                     <button type="submit" className="btn btn-primary mt-4 pl-4 pr-4 pt-2 pb-2 d-block ml-auto log">Login <i className="fas fa-sign-in-alt"></i></button>
-                                    <div className="d-block text-right text-primary mt-3 small log-link" id="no-acct">Don't have an account?</div>
+                                    <div className="d-block text-right"><div className="d-inline-block text-primary mt-3 small log-link" id="no-acct">Don't have an account?</div></div>
                                 </form>
                             </div>
                         </div>
@@ -161,8 +194,7 @@ const mapStateToProps = (state) => {
     const { authentication } = state
     return{
         status: authentication.status,
-        text: authentication.statusText,
-        isAuth: authentication.isAuthenticated
+        attempts: authentication.loginAttempts
     }
 };
   
