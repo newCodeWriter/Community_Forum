@@ -45,7 +45,8 @@ const authentication = (state = userInfo, action) => {
         case GET_AUTH:
             return {...state, 
                 isAuthenticated: userAuth.loggedIn(), 
-                loggedIn: userAuth.loggedIn()}
+                loggedIn: userAuth.loggedIn()
+            }
         default:
             return state
     }
@@ -57,7 +58,7 @@ const data_request = (state = [], action) => {
             return [
                 ...state,
                 action.payload
-            ]
+            ].slice(-1)
         default:
             return state
         

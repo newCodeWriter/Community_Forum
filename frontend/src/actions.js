@@ -75,3 +75,15 @@ export function fetchAnswers(id){
 export const getAuthorization = () => ({
   type: GET_AUTH
 })
+
+export function changeUser(old_name, new_name){
+  return async (dispatch) => {
+    let data = {
+      old_name: old_name, 
+      new_name: new_name
+    }
+    axios.put(`/update/user`, data)
+    .then(dispatch(fetchData(new_name)))
+    .catch(err => console.log(err));
+  };
+}
