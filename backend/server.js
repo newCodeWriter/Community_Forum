@@ -27,12 +27,7 @@ app.get('/category/:category', async (req, res) => {
         connection.query(sql, [req.params.category], (err, rows) => {
             if(err) throw err;
             else{
-                if(rows.length === 0){
-                    res.sendStatus(404)
-                }
-                else{
-                    res.send(rows)
-                }
+                res.send(rows)
             }
         })
     }
@@ -205,6 +200,73 @@ app.post('/login', async (req, res) =>{
                     }
                 })
             }
+        }
+    })
+})
+
+app.get('/check/:newName', async (req, res) => {
+    const sql = `SELECT username FROM Users WHERE username LIKE ?`
+    connection.query(sql, [req.params.newName], (err, result) => {
+        if(err) throw err; 
+        else{
+            if(result.length === 1){
+                res.send('not available')
+            }
+            else{
+                res.send('ok')
+            }
+        }
+    })
+})
+
+app.put('/update/user', async (req, res) => {
+    const { new_name, old_name } = req.body;
+    const sql = `UPDATE Users SET username = ? WHERE username = ?`;
+    connection.query(sql, [new_name, old_name], (err, result) => {
+        if(err) throw err; 
+        else{
+            console.log(`Username for ${old_name} has been updated to ${new_name}.`)
+        }
+    })
+})
+
+app.put('/update/password', async (req, res) => {
+    const { old_pwd, new_pwd, user } = req.body;
+    const pwd_query = `SELECT password FROM Users WHERE username = ?`;
+    const update = `UPDATE Users SET password = ? WHERE username = ?`;
+
+    connection.query(pwd_query, [user], (err, row) => {
+        if(err) throw err; 
+        else{
+            const pwd = row[0].password;
+            bcrypt.compare(old_pwd, pwd, (error, bool) => {
+                if(error) throw error; 
+                else{
+                    if(bool){
+                        connection.query(update, [new_pwd, user], (err, result) => {
+                            if(err) throw err; 
+                            else{
+                                res.send('Your password has been updated.');
+                                console.log(`Password for ${user} has been updated.`)
+                            }
+                        })
+                    }
+                    else{
+                        res.sendStatus(404)
+                    }
+                }
+            })
+        }
+    })
+})
+
+app.delete('/delete/:user', (req, res) => {
+    const sql = `DELETE FROM Users WHERE username = ?`;
+    connection.query(sql, [req.params.user],(err, result) => {
+        if(err) throw err; 
+        else{
+            res.send('Your account has been deleted.')
+            console.log('Deleted Row(s):', result.affectedRows)
         }
     })
 })
