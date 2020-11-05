@@ -8,6 +8,7 @@ class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            active: true,
             reg_user: '',
             reg_pwd1: '',
             reg_pwd2: '',
@@ -15,6 +16,7 @@ class Login extends Component {
             reg_user_error: false,
             reg_pwd_error: false,
             reg_pwd_test_error: false,
+            reg_pwd_match_error: false,
             log_user_error: false,
             log_pwd_error: false,
             log_user: '',
@@ -36,7 +38,7 @@ class Login extends Component {
     
     handleInputChange = (event) => {
 
-        const target = event.target
+        const target = event.target;
         const name = target.name;
         const val = target.type === 'checkbox' ? target.checked : target.value; 
         
@@ -101,7 +103,31 @@ class Login extends Component {
         this.props.dispatch(loginUser(data));
     }
 
+    handleClick = () => {
+        const loginForm = document.getElementById('login-form');
+        const regForm = document.getElementById('register-form');
+        this.setState({
+            active: !this.state.active,
+            reg_user_error: false,
+            reg_pwd_error: false,
+            reg_pwd_test_error: false,
+            reg_pwd_match_error: false,
+            log_user_error: false,
+            log_pwd_error: false,
+        })
+        loginForm.reset();
+        regForm.reset();
+    }
+
     render() {
+        let log_disabled = this.state.active ? false : true;
+        let loginStyle = {cursor: this.state.active ? 'pointer' : 'not-allowed'};
+        let reg_disabled = this.state.active ? true : false;
+        let regStyle = {
+            cursor: this.state.active ? 'not-allowed' : 'pointer',
+            display: this.state.active ? 'none' : 'block'
+        };
+
         return(
             <div>
                 <div className="bg-image"></div>
@@ -116,16 +142,15 @@ class Login extends Component {
                                 <form onSubmit={this.handleRegister} id="register-form">
                                     <h4 className="mb-4">Register</h4>
                                     <div className="input-group">
-                                        <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} minLength="4" required disabled />
+                                        <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} minLength="4" required disabled={reg_disabled} />
                                     </div>
                                     {this.state.reg_user_error
                                     ? <div className="text-danger small errors">This user already exists. Please try another username.</div>
                                     : <div></div>
                                     }
                                     <div className="input-group mt-3">
-                                        <input type="password" className="form-control reg" name="reg_pwd1" id="reg_pwd1" placeholder="Password" onChange={this.handleInputChange} required disabled />
+                                        <input type="password" className="form-control reg" name="reg_pwd1" id="reg_pwd1" placeholder="Password" onChange={this.handleInputChange} required disabled={reg_disabled} />
                                     </div>
-                                    {/* <div className="text-danger small errors">{this.state.reg_pwd_test_error}</div> */}
                                     { this.state.reg_pwd_test_error 
                                     ? <ul className="text-danger small errors">
                                         Your password must contain: 
@@ -137,7 +162,7 @@ class Login extends Component {
                                     : <div></div>
                                     }
                                     <div className="input-group mt-3">
-                                        <input type="password" className="form-control reg" name="reg_pwd2" id="reg_pwd2" placeholder="Confirm Password" onChange={this.handleInputChange} required disabled />
+                                        <input type="password" className="form-control reg" name="reg_pwd2" id="reg_pwd2" placeholder="Confirm Password" onChange={this.handleInputChange} required disabled={reg_disabled} />
                                     </div>
                                     {this.state.reg_pwd_match_error
                                     ? <div className="text-danger small errors">Your passwords do not match.</div>
@@ -145,12 +170,12 @@ class Login extends Component {
                                     }
                                     <div className="form-check mt-2">
                                         <label htmlFor="terms" className="form-check-label small">
-                                            <input type="checkbox" name="terms" id="terms" className="form-check-input reg" onChange={this.handleInputChange} disabled required />
+                                            <input type="checkbox" name="terms" id="terms" className="form-check-input reg" onChange={this.handleInputChange} disabled={reg_disabled} required />
                                             I agree to the Terms and Conditions and Privacy Policy
                                         </label>
                                     </div>
-                                    <button type="submit" className="btn btn-success mt-3 mb-3 pl-4 pr-4 pt-2 pb-2 d-block ml-auto reg" disabled>Register <i className="fas fa-user-plus"></i></button>
-                                    <div className="small text-right text-success mb-3" id="has-acct">Already have an account? Log In</div>
+                                    <button type="submit" className="btn btn-success mt-3 mb-3 pl-4 pr-4 pt-2 pb-2 d-block ml-auto reg" disabled={reg_disabled}>Register <i className="fas fa-user-plus"></i></button>
+                                    <div className="small text-right text-success mb-3" id="has-acct" onClick={this.handleClick} style={regStyle}>Already have an account? Log In</div>
                                 </form>
                             </div>
                             {/* Login Form */}
@@ -161,7 +186,7 @@ class Login extends Component {
                                         <div className="input-group-prepend">
                                             <div className="input-group-text bg-primary text-light"><i className="fas fa-user"></i></div>
                                         </div>
-                                        <input type="text" className="form-control log" onChange={this.handleInputChange} name="log_user" id="log_user" placeholder="Username" minLength="4" required />
+                                        <input type="text" className="form-control log" onChange={this.handleInputChange} name="log_user" id="log_user" placeholder="Username" minLength="4" required disabled={log_disabled}/>
                                     </div>
                                     {this.state.log_user_error
                                     ? <div className="text-danger small errors">This user does not exist.</div>
@@ -171,15 +196,14 @@ class Login extends Component {
                                         <div className="input-group-prepend">
                                             <div className="input-group-text bg-primary text-light"><i className="fas fa-key"></i></div>
                                         </div>
-                                        <input type="password" className="form-control log" onChange={this.handleInputChange} name="log_pwd" id="log_pwd" placeholder="Password" minLength="8" required />
+                                        <input type="password" className="form-control log" onChange={this.handleInputChange} name="log_pwd" id="log_pwd" placeholder="Password" minLength="8" required disabled={log_disabled}/>
                                     </div>
                                     {this.state.log_pwd_error
                                     ? <div className="text-danger small errors">You entered an incorrect password.</div>
                                     : <div></div>
                                     }
-                                    <div id="forgot" className="log-link mt-2 d-inline text-primary small"> Forgot Password?</div>
-                                    <button type="submit" className="btn btn-primary mt-4 pl-4 pr-4 pt-2 pb-2 d-block ml-auto log">Login <i className="fas fa-sign-in-alt"></i></button>
-                                    <div className="d-block text-right"><div className="d-inline-block text-primary mt-3 small log-link" id="no-acct">Don't have an account?</div></div>
+                                    <button type="submit" className="btn btn-primary mt-4 pl-4 pr-4 pt-2 pb-2 d-block ml-auto log" disabled={log_disabled}>Login <i className="fas fa-sign-in-alt"></i></button>
+                                    <div className="d-block text-right"><div className="d-inline-block text-primary mt-3 small log-link" id="no-acct" onClick={this.handleClick} style={loginStyle}>Don't have an account?</div></div>
                                 </form>
                             </div>
                         </div>
