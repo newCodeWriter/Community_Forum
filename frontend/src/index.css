@@ -26,14 +26,13 @@
   background: #0275d8;
   color: white !important;
 }
-.active-link{
-  border-right: 3px solid black;
-}
 
 #has-acct{
   display: none;
 }
-
+.profile:hover{
+  background-color: #bcc0c2;
+}
 a{
   text-decoration: none !important;
 }
@@ -47,10 +46,62 @@ a{
   white-space: pre-line;
 }
 #nav-dropdown{
-background: none;
-border: none;
-box-shadow: none;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 .set-width{
   width: 85%;
+}
+
+/* media queries */
+@media (max-width: 576px){
+  .reg-container{
+    border-right: none;
+  }
+  .source{
+    font-size: .85rem !important;
+  }
+}
+@media (min-width: 767px){
+  #acct-chg{
+    width: 50% !important;
+  }
+}
+@media (max-width: 767px){
+  .q-user{
+    text-align: left !important;
+  }
+  .mq-font{
+    font-size: .75rem;
+  }
+  #acct-chg{
+    width: 75% !important;
+  }
+  .acct-font{
+    font-size: 1.3rem;
+  }
+  .home{
+    width: 80%;
+  }
+}
+@media (min-width: 768px) and (max-width: 900px){
+  .home{
+    width: 70%;
+  }
+}
+@media (max-width: 991px){
+  #answer-btn{
+    text-align: left !important;
+  }
+}
+@media (max-width: 1039px){
+  .source{
+    font-size: 1rem;
+  }
+}
+@media (min-width: 901px) and (max-width: 1150px){
+  .home{
+    width: 55%;
+  }
 }

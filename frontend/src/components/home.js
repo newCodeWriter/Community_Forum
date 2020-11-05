@@ -25,33 +25,35 @@ function Home({ match, dispatch }){
     return(
         <div>
             <Navbar bg="dark" variant="dark" className="pt-2 pb-2" sticky="top">
-                <Nav className="mx-auto">
+                <Nav className="pl-2">
                     <Navbar.Brand href={`${match.url}`} id="math">MathQue</Navbar.Brand>
                 </Nav>
                 <Nav className="ml-auto">
                     <Dropdown as={NavItem} className="mr-3">
                         <Dropdown.Toggle id="nav-dropdown"><i className="fas fa-user-alt"></i> Welcome, {userName.toUpperCase()}</Dropdown.Toggle>
                         <Dropdown.Menu className="mt-2">
-                            <Dropdown.Item href={`${match.url}/account`}>Account</Dropdown.Item>
+                            <Dropdown.Item href={`${match.url}/account`} className="profile">Account</Dropdown.Item>
+                            {/* add logout to dropdown for mobile devices */}
+                            <Dropdown.Item onClick={handleLogout} className="d-block d-sm-none profile">Logout</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
-                    <Button variant="primary" onClick={handleLogout}>Logout</Button>
+                    <Button variant="primary" onClick={handleLogout} className="d-none d-sm-block">Logout</Button>
                 </Nav>
             </Navbar>
-            <div className="row w-100">
-                <div className="col-md-3">
+            <div className="row w-100 m-0">
+                <div className="col-sm-5 col-md-4 col-lg-3 pl-0 pr-0">
                     <Nav className="flex-column flex-c">
                         {math.map(({ name, id }) => (
                             <NavLink key={id} to={`${match.url}/${id}`}
                                 activeClassName="active-link" 
-                                className="pt-4 pb-4 pl-3 pr-3 border-bottom category-link" 
+                                className="pt-4 pb-4 pl-4 pr-3 border-bottom category-link" 
                                 onClick={() => dispatch(fetchCategoryInfo(`${id}`))}>
                                 {name} 
                             </NavLink>
                         ))}
                     </Nav>
                 </div>
-                <div className="col-md-9 mt-5">
+                <div className="col-sm-7 col-md-8 col-lg-9 mt-5">
                     <Switch>
                         <Route exact path={`${match.path}`} render={() => <h3 className="ml-5">Select a category to view its questions...</h3>} />
                         <Route path={`${match.path}/:subjectId/question`} component={Question} />

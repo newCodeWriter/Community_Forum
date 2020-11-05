@@ -18,8 +18,7 @@ function ChangeAcct({ dispatch }){
         user_ok: '',
         pw_error: '', 
         pwd_test_error: false,
-        disabled: true, 
-        validate: false
+        disabled: true
     })
 
     let history = useHistory();
@@ -36,8 +35,7 @@ function ChangeAcct({ dispatch }){
                 user_ok: '',
                 pw_error: '',
                 pwd_test_error: false,
-                disabled: true,
-                validate: false
+                disabled: true
             })
         }
         else if(event.target.value === 'change username'){
@@ -49,8 +47,7 @@ function ChangeAcct({ dispatch }){
                 user_ok: '',
                 pw_error: '',
                 pwd_test_error: false,
-                disabled: true,
-                validate: false
+                disabled: true
             })
         }
         else if(event.target.value === 'delete account'){
@@ -62,8 +59,7 @@ function ChangeAcct({ dispatch }){
                 user_ok: '',
                 pw_error: '',
                 pwd_test_error: false,
-                disabled: true, 
-                validate:false
+                disabled: true
             })
         }
         else{
@@ -75,8 +71,7 @@ function ChangeAcct({ dispatch }){
                 user_ok: '',
                 pw_error: '', 
                 pwd_test_error: false,
-                disabled: true,
-                validate:false
+                disabled: true
             })
         }
     }
@@ -127,12 +122,6 @@ function ChangeAcct({ dispatch }){
 
     function handleSubmit(event){
         event.preventDefault();
-        setState(prevState => {
-            return {
-                ...prevState, 
-                validate: true
-            };
-        });
         if(event.target.name === 'userBtn'){
             var newName = document.getElementById('new_name').value.toLowerCase();
             dispatch(changeUser(userName, newName));
@@ -145,7 +134,15 @@ function ChangeAcct({ dispatch }){
             var conPwd = document.getElementById('conPwd').value;
             const pwd_test = patt.test(newPwd);
 
-            if(pwd_test && oldPwd !== newPwd && newPwd === conPwd){
+            if(newPwd.length === 0 || oldPwd.length === 0 || conPwd.length === 0){
+                setState(prevState => {
+                    return {
+                        ...prevState, 
+                        pw_error: 'A value is required for each field.'
+                    };
+                });
+            }
+            else if(pwd_test && oldPwd !== newPwd && newPwd === conPwd){
                 var update_pwd = {
                     user: userName,
                     old_pwd: oldPwd,
@@ -165,17 +162,11 @@ function ChangeAcct({ dispatch }){
                     else{
                         console.log(res.data)
                         document.getElementById('pwd-form').reset();
-                        setState(prevState => {
-                            return {
-                                ...prevState, 
-                                validate: false
-                            };
-                        });
                     }
                 })
                 .catch(err => { console.log(err) })
             }
-            else if(newPwd.length >= 4 && oldPwd === newPwd){
+            else if(oldPwd === newPwd){
                 setState(prevState => {
                     return {
                         ...prevState, 
@@ -231,9 +222,9 @@ function ChangeAcct({ dispatch }){
     }
 
     return (
-        <div className="w-50 ml-5">
-            <h3 className="mb-4">{userName.toUpperCase()}, select an action:</h3>
-            <Form.Control as="select" custom className="mb-5 w-50" defaultValue="" onChange={handleSelect} id="actions">
+        <div id="acct-chg" className="w-100 ml-5">
+            <h3 className="mb-4 acct-font">{userName.toUpperCase()}, select an action:</h3>
+            <Form.Control as="select" custom className="mb-5 w-75" defaultValue="" onChange={handleSelect} id="actions">
                 <option value="action"></option>
                 <option value="change username">Change Username</option>
                 <option value="change password">Change Password</option>
@@ -254,23 +245,23 @@ function ChangeAcct({ dispatch }){
                 </InputGroup>
                 <div className="text-success small">{state.user_ok}</div>
                 <div className="text-danger small">{state.user_error}</div>
-                <Button variant="primary" name="userBtn" type="button" className="mr-2 mt-4 p-2" disabled={state.disabled} onClick={handleSubmit}>Submit</Button>
+                <Button variant="primary" name="userBtn" type="button" className="mr-2 mt-4 p-2 mb-3" disabled={state.disabled} onClick={handleSubmit}>Submit</Button>
               </Form>
             : null
             }
             {state.pw_action === true 
-            ? <Form id="pwd-form" validated={state.validate}>
+            ? <Form id="pwd-form">
                 <Form.Group>
                     <Form.Label>Current Password:</Form.Label>
-                    <Form.Control type="password" id="oldPwd" className="mb-3" placeholder="Old Password" onChange={handleTextChange} required/>
+                    <Form.Control type="password" id="oldPwd" className="mb-3" placeholder="Old Password" onChange={handleTextChange}/>
                     <Form.Label>New Password:</Form.Label>
-                    <Form.Control type="password" id="newPwd" className="mb-3" placeholder="New Password" onChange={handleTextChange} required/>
+                    <Form.Control type="password" id="newPwd" className="mb-3" placeholder="New Password" onChange={handleTextChange}/>
                     <Form.Label>Confirm Password:</Form.Label>
-                    <Form.Control type="password" id="conPwd" placeholder="Confirm Password" onChange={handleTextChange} required/>
+                    <Form.Control type="password" id="conPwd" placeholder="Confirm Password" onChange={handleTextChange}/>
                     <div className="text-danger small">{state.pw_error}</div>
                     {state.pwd_test_error 
                     ? <ul className="text-danger small errors">
-                        Your password must contain: 
+                        Your new password must contain: 
                         <li className="pwd-error">At least eight characters</li>
                         <li className="pwd-error">At least one letter</li>
                         <li className="pwd-error">At least one number</li>
@@ -279,14 +270,14 @@ function ChangeAcct({ dispatch }){
                     : <div></div>
                     }
                 </Form.Group>
-                <Button variant="primary" className="mt-3" name="pwdBtn" type="button" onClick={handleSubmit}>Submit</Button>
+                <Button variant="primary" className="mt-3 mb-3" name="pwdBtn" type="button" onClick={handleSubmit}>Submit</Button>
               </Form>
             : null
             }
             {state.delete_action === true 
             ? <div>
-                <h4 className="mb-4">Are you sure you want to delete your account?</h4>
-                <Button variant="danger" name="delBtn" type="button" className="mr-3" onClick={handleSubmit}>Confirm</Button>
+                <h4 className="mb-4 acct-font">Are you sure you want to delete your account?</h4>
+                <Button variant="danger" name="delBtn" type="button" className="mb-3" onClick={handleSubmit}>Confirm</Button>
               </div>
             : null
             }

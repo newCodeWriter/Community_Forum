@@ -177,15 +177,15 @@ class Post extends Component {
                 <div className="set-width mx-auto">
                     {this.state.answers.length >= 1 && this.state.username === this.state.answers[0].submit_user
                     ? <div className="row">
-                        <div className="col-md-10">
+                        <div className="col-12 col-lg-10">
                             <h4>{this.state.answers.length === 0 ? null : this.state.answers[0].question}</h4>
-                            <div>Submitted by: <span className="text-primary">{this.state.answers.length === 0 ? null : this.state.answers[0].submit_user}</span>,&nbsp; 
+                            <div className="mq-font">Submitted by: <span className="text-primary">{this.state.answers.length === 0 ? null : this.state.answers[0].submit_user}</span>,&nbsp; 
                                 {this.state.answers.length === 0 ? null : this.state.answers[0].question_date} 
                                 <i className="fas fa-edit mt-2 small ml-2 mr-2 open_question" onClick={this.handleEdit}></i>
                                 <i className="fas fa-trash-alt delete_question" onClick={this.handleDelete}></i>
                             </div>
                         </div>
-                        <div className="col-md-2 text-primary text-right">
+                        <div id="answer-btn" className="col-12 col-lg-2 mt-3 mt-lg-0 text-primary text-right">
                             <Button variant="success" onClick={this.handleShow} type="button" className="p-2" title="Have an answer?">Answer</Button>
                         </div>
                     </div>

@@ -35,10 +35,10 @@ class Subject extends Component{
                     ? null
                     : this.state.questions[0].map( q => (
                         <Link key={`question_${q.question_id}`} to={`${this.props.match.url}/${q.question_id}`}>
-                            <div id={q.question_id} className="border border-light bg-light d-block mb-3 p-3 subject-container">
+                            <div id={q.question_id} className="border border-light bg-light d-block mb-3 p-3 subject-container shadow">
                                 <div className="row">
-                                    <div className="col-md-4 text-muted small">{q.date}</div>
-                                    <div className="col-md-8 text-success text-right small">by: {q.username}</div>
+                                    <div className="col-md-5 text-muted small">{q.date}</div>
+                                    <div className="col-md-7 text-success text-right small q-user">by: {q.username}</div>
                                 </div>
                                 <div className="row mt-3 w-100">
                                     <div className="col">{q.new_question}</div>
