@@ -61,6 +61,26 @@ app.put('/question', async (req, res) => {
     })
 });
 
+app.post('/answer', async (req, res) => {
+    const get_user_id = `SELECT user_id FROM Users WHERE username = ?`;
+    const add_answer = `INSERT INTO Responses(user_id, question_id, response) VALUES(?, ?, ?) ` 
+    connection.query(get_user_id, [req.body.user], (err, row) => {
+        if(err) throw err; 
+        else{
+            const userId = row[0].user_id;
+            const values = [userId, req.body.id, req.body.answer]
+            connection.query(add_answer, values, (err, row) => {
+                if(err) throw err; 
+                else{
+                    res.send('Your answer has been submitted.')
+                    console.log('Answer submitted.')
+                }
+            })
+            
+        }
+    })
+})
+
 app.get('/post/:questionId', async (req, res) => {
     const sql = `SELECT submit_user, question_id, question, question_date, answer_user, response_id, response, response_date FROM (SELECT question_id, username AS submit_user, question, DATE_FORMAT(question_date,"%b %e '%y at %l:%i %p") AS question_date FROM Questions INNER JOIN Users USING (user_id) WHERE question_id = ?) AS user_question INNER JOIN (SELECT question_id, username AS answer_user, id AS response_id, response, DATE_FORMAT(response_date, "%b %e '%y at %l:%i %p") AS response_date FROM Responses INNER JOIN Users USING (user_id) WHERE question_id = ?) AS answers USING (question_id);`
     // const sql = `SELECT username AS answer_user, response, DATE_FORMAT(response_date, "%b %e '%y at %l:%i %p") AS response_date FROM Responses INNER JOIN Users USING (user_id) WHERE question_id = ?`
@@ -101,26 +121,6 @@ app.put('/update/answer/:answerId', async (req, res) => {
         if(err) throw err;
         else{
             res.send('It is a success')
-        }
-    })
-})
-
-app.post('/answer', async (req, res) => {
-    const get_user_id = `SELECT user_id FROM Users WHERE username = ?`;
-    const add_answer = `INSERT INTO Responses(user_id, question_id, response) VALUES(?, ?, ?) ` 
-    connection.query(get_user_id, [req.body.user], (err, row) => {
-        if(err) throw err; 
-        else{
-            const userId = row[0].user_id;
-            const values = [userId, req.body.id, req.body.answer]
-            connection.query(add_answer, values, (err, row) => {
-                if(err) throw err; 
-                else{
-                    res.send('Your answer has been submitted.')
-                    console.log('Answer submitted.')
-                }
-            })
-            
         }
     })
 })
@@ -231,33 +231,39 @@ app.put('/update/user', async (req, res) => {
 })
 
 app.put('/update/password', async (req, res) => {
-    const { old_pwd, new_pwd, user } = req.body;
-    const pwd_query = `SELECT password FROM Users WHERE username = ?`;
-    const update = `UPDATE Users SET password = ? WHERE username = ?`;
-
-    connection.query(pwd_query, [user], (err, row) => {
-        if(err) throw err; 
-        else{
+    try{
+        const { old_pwd, new_pwd, user } = req.body;
+        const pwd_query = `SELECT password FROM Users WHERE username = ?`;
+        const update = `UPDATE Users SET password = ? WHERE username = ?`;
+        const new_hashPwd = await bcrypt.hash(new_pwd, 10);
+    
+        connection.query(pwd_query, [user], (err, row) => {
             const pwd = row[0].password;
-            bcrypt.compare(old_pwd, pwd, (error, bool) => {
-                if(error) throw error; 
-                else{
-                    if(bool){
-                        connection.query(update, [new_pwd, user], (err, result) => {
-                            if(err) throw err; 
-                            else{
-                                res.send('Your password has been updated.');
-                                console.log(`Password for ${user} has been updated.`)
-                            }
-                        })
-                    }
+            if(err) throw err; 
+            else{
+                bcrypt.compare(old_pwd, pwd, (error, bool) => {
+                    if(error) throw error; 
                     else{
-                        res.sendStatus(404)
+                        if(bool){
+                            connection.query(update, [new_hashPwd, user], (err, result) => {
+                                if(err) throw err ; 
+                                else{
+                                    res.send('Your password has been updated.');
+                                    console.log(`Password for ${user} has been updated.`)
+                                }
+                            })
+                        }
+                        else{
+                            res.send('wrong password')
+                        }
                     }
-                }
-            })
-        }
-    })
+                })
+            }
+        })
+    }
+    catch{
+        res.status(500).send()
+    }
 })
 
 app.delete('/delete/:user', (req, res) => {
