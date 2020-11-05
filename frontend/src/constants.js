@@ -4,6 +4,7 @@ export const LOGIN_USER_SUCCESS = "LOGIN_USER_SUCCESS";
 export const LOGOUT_USER = "LOGOUT_USER";
 export const FETCH_DATA = "FETCH_DATA";
 export const GET_AUTH = "GET_AUTH";
+export const UPDATE_USER = "UPDATE_USER";
 
 export const math = [
     {name: 'Algebra', id: 'algebra'}, 

@@ -25,31 +25,5 @@
     -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/67e14e1161.js" crossorigin="anonymous"></script>
-    <script>
-        $(function(){
-            $('#no-acct').on('click', function(){
-                $('.log-link').css('cursor', 'not-allowed');
-                $('.reg').removeAttr('disabled');
-                $('#has-acct').css({'display': 'block', 'cursor': 'pointer'});
-                // disable login inputs
-                $('.log').attr('disabled', 'disabled');
-                // clear any input or errors
-                $('#login-form')[0].reset();
-                $('.errors').text('')
-
-            })
-
-            $('#has-acct').on('click', function(){
-                $('#has-acct').css('cursor', 'not-allowed');
-                $('.log').removeAttr('disabled');
-                $('.log-link').css('cursor', 'pointer');
-                // disable registration inputs
-                $('.reg').attr('disabled', 'disabled');
-                // clear any input or errors
-                $('#register-form')[0].reset();
-                $('.errors').text('')
-            })
-        })
-    </script>
   </body>
 </html>
