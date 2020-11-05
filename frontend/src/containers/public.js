@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { userAuth } from '../checkAuth';
+import { userAuth } from '../localStorage';
 
 const PublicRoute = ({component: Component, ...rest}) => {
     return (
