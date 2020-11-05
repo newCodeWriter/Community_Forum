@@ -3,22 +3,23 @@ import Button from 'react-bootstrap/Button'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import { Route, Switch, NavLink } from "react-router-dom"
+import Dropdown from 'react-bootstrap/Dropdown'
+import NavItem from 'react-bootstrap/NavItem'
 import Subject from './subject'
 import Question from './question'
 import Post from './post'
+import ChangeAcct from './changeAcct'
 import { math } from '../constants'
 import { connect } from 'react-redux'
-import { logout } from '../actions'
-import { userAuth } from '../checkAuth'
-import { useHistory } from 'react-router-dom';
+import { fetchCategoryInfo, logout } from '../actions'
+import { copyState } from '../localStorage'
 
-function Home({ userLogout, match }){
+function Home({ match, dispatch }){
 
-    let history = useHistory();
+    const { userName } = copyState().authentication
 
     function handleLogout(){
-        userLogout();
-        history.replace('/login');
+        dispatch(logout());
     }
     
     return(
@@ -28,7 +29,12 @@ function Home({ userLogout, match }){
                     <Navbar.Brand href={`${match.url}`} id="math">MathQue</Navbar.Brand>
                 </Nav>
                 <Nav className="ml-auto">
-                    <Nav.Link href="home/"><i className="fas fa-user-alt"></i> Welcome, {userAuth.getUser().toUpperCase()}</Nav.Link>
+                    <Dropdown as={NavItem} className="mr-3">
+                        <Dropdown.Toggle id="nav-dropdown"><i className="fas fa-user-alt"></i> Welcome, {userName.toUpperCase()}</Dropdown.Toggle>
+                        <Dropdown.Menu className="mt-2">
+                            <Dropdown.Item href={`${match.url}/account`}>Account</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                     <Button variant="primary" onClick={handleLogout}>Logout</Button>
                 </Nav>
             </Navbar>
@@ -36,14 +42,21 @@ function Home({ userLogout, match }){
                 <div className="col-md-3">
                     <Nav className="flex-column flex-c">
                         {math.map(({ name, id }) => (
-                            <NavLink key={id} to={`${match.url}/${id}`} activeClassName="active-link" className="pt-4 pb-4 pl-3 border-bottom">{name}</NavLink>
+                            <NavLink key={id} to={`${match.url}/${id}`}
+                                activeClassName="active-link" 
+                                className="pt-4 pb-4 pl-3 pr-3 border-bottom category-link" 
+                                onClick={() => dispatch(fetchCategoryInfo(`${id}`))}>
+                                {name} 
+                            </NavLink>
                         ))}
                     </Nav>
                 </div>
-                <div className="col-md-9">
+                <div className="col-md-9 mt-5">
                     <Switch>
+                        <Route exact path={`${match.path}`} render={() => <h3 className="ml-5">Select a category to view its questions...</h3>} />
                         <Route path={`${match.path}/:subjectId/question`} component={Question} />
                         <Route path={`${match.path}/:subjectId/:questionId`} component={Post} />
+                        <Route exact path={`${match.path}/account`} component={ChangeAcct} />
                         <Route path={`${match.path}/:subjectId`} component={Subject} />
                     </Switch>
                 </div>
@@ -52,12 +65,4 @@ function Home({ userLogout, match }){
     )
 }
 
-
-const mapDispatchToProps = (dispatch) => ({
-    userLogout: () => {
-      dispatch(logout())
-    }
-})
-
-export default connect(null, mapDispatchToProps)(Home);
-
+export default connect()(Home);

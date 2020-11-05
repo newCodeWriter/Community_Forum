@@ -3,9 +3,9 @@ import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
-import { fetchAnswers } from '../actions'
+import { fetchAnswers, fetchCategoryInfo } from '../actions'
 import axios from 'axios'
-import { userAuth } from '../checkAuth'
+import { copyState } from '../localStorage'
 
 class Post extends Component {
     constructor(props){
@@ -17,7 +17,7 @@ class Post extends Component {
             mark_error: '',
             length_error: '',
             answers: [],
-            username: userAuth.getUser(),
+            username: copyState().authentication.userName,
             edit_btn: false,
             answer_id: null,
             answer_text: null, 
@@ -26,7 +26,7 @@ class Post extends Component {
     }
 
     componentDidMount(){
-        this.props.getInfo(this.props.match.params.questionId)
+        this.props.dispatch(fetchAnswers(this.props.match.params.questionId))
     }
 
     componentDidUpdate(prevProps){
@@ -50,15 +50,16 @@ class Post extends Component {
         var replace = text.replace(/(\r\n|\r)/gm,"\n");
         
         var data = {
-            user: userAuth.getUser(),
+            user: this.state.username,
             id: this.props.match.params.questionId,
             answer: replace
         }
         if(text.length >= 5){
             axios.post('/answer', data)
-            .then(res => console.log(res.data))
+            // find a way to have the server return the new answer and then add it to this.state.answers
+            .then(this.setState({show: false}))
+            .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
             .catch(err => console.log(err))
-            window.location.reload();
         }
         else{
             this.setState({error: 'You must enter at least 5 characters.'})
@@ -88,17 +89,14 @@ class Post extends Component {
         var original = this.state.answer_text[0].response;
         var update = document.getElementById('updated_answer').value;
         var id = this.state.answer_text[0].response_id
-        // var index = this.state.answers.findIndex(ans => ans.response_id === this.state.answer_text[0].response_id);
-        // var copy = this.state.answers.slice();
-        // copy[index].response = update;
         if(update.length >= 5 && original !== update){
             var replace = update.replace(/(\r\n|\r)/gm,"\n");
             var data = { update: replace }
             
             axios.put(`/update/answer/${id}`, data)
-            .then(res => console.log(res.data))
+            .then(this.setState({show: false}))
+            .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
             .catch(err => console.log(err))
-            window.location.reload();
         }
         else if(original === update){
             this.setState({error: 'You have made no changes. Please update or press cancel.'})
@@ -113,6 +111,7 @@ class Post extends Component {
             var question_id = this.props.match.params.questionId;
             axios.delete(`/delete/question/${question_id}`)
             .then(this.setState({redirect: true}))
+            .then(this.props.dispatch(fetchCategoryInfo(this.props.match.params.subjectId)))
             .catch(err => console.log(err))
         }
         else{
@@ -122,9 +121,8 @@ class Post extends Component {
             copy.splice(index,1);
     
             axios.delete(`/delete/answer/${answer_id}`)
-            .then(res => console.log(res))
+            .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
             .catch(err => console.log(err))
-            window.location.reload()
         }
     }
 
@@ -143,9 +141,9 @@ class Post extends Component {
         else{
             if(update.endsWith('?') && update.length >= 10){
                 axios.put(`/update/question/${id}`, data)
-                .then(res => console.log(res.data))
+                .then(this.setState({show_question: false}))
+                .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
                 .catch(console.error())
-                window.location.reload();
             }
             else if(!update.endsWith('?') && update.length < 10){
                 this.setState({
@@ -176,29 +174,29 @@ class Post extends Component {
         }
         else{
             return(
-                <div className="mt-5 w-75 mx-auto">
+                <div className="set-width mx-auto">
                     {this.state.answers.length >= 1 && this.state.username === this.state.answers[0].submit_user
                     ? <div className="row">
-                        <div className="col-md-8">
-                            <h3>{this.state.answers.length === 0 ? null : this.state.answers[0].question}</h3>
+                        <div className="col-md-10">
+                            <h4>{this.state.answers.length === 0 ? null : this.state.answers[0].question}</h4>
                             <div>Submitted by: <span className="text-primary">{this.state.answers.length === 0 ? null : this.state.answers[0].submit_user}</span>,&nbsp; 
                                 {this.state.answers.length === 0 ? null : this.state.answers[0].question_date} 
                                 <i className="fas fa-edit mt-2 small ml-2 mr-2 open_question" onClick={this.handleEdit}></i>
                                 <i className="fas fa-trash-alt delete_question" onClick={this.handleDelete}></i>
                             </div>
                         </div>
-                        <div className="col-md-4 text-primary text-right">
+                        <div className="col-md-2 text-primary text-right">
                             <Button variant="success" onClick={this.handleShow} type="button" className="p-2" title="Have an answer?">Answer</Button>
                         </div>
                     </div>
                     : <div className="row">
-                        <div className="col-md-8">
+                        <div className="col-md-10">
                             <h3>{this.state.answers.length === 0 ? null : this.state.answers[0].question}</h3>
                             <div>Submitted by: <span className="text-primary">{this.state.answers.length === 0 ? null : this.state.answers[0].submit_user}</span>,&nbsp; 
                                 {this.state.answers.length === 0 ? null : this.state.answers[0].question_date}
                             </div>
                         </div>
-                        <div className="col-md-4 text-primary text-right">
+                        <div className="col-md-2 text-primary text-right">
                             <Button variant="success" onClick={this.handleShow} type="button" className="p-2" title="Have an answer?">Answer</Button>
                         </div>
                     </div>
@@ -281,10 +279,4 @@ const mapStateToProps = (state) => ({
     data: state.data_request
 })
 
-const mapDispatchToProps = (dispatch) => ({
-    getInfo: (id) => {
-      dispatch(fetchAnswers(id))
-    }
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(Post);
+export default connect(mapStateToProps, null)(Post);

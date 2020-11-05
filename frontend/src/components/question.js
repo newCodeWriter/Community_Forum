@@ -1,22 +1,25 @@
 import React, { useState } from 'react'
-// import { math } from '../constants'
 import Button from 'react-bootstrap/Button'
 import axios from 'axios'
-import { useHistory } from 'react-router-dom';
-import { userAuth } from '../checkAuth';
+import { connect } from 'react-redux'
+import { useHistory } from 'react-router-dom'
+import { copyState } from '../localStorage'
+import { fetchCategoryInfo } from '../actions'
 
-export default function Question({match}){
+function Question({ match, dispatch }){
     const [ error, setError ] = useState({
         mark: '',
         length: ''
     })
 
-    let history = useHistory();
+    const history = useHistory();
+
+    const { userName } = copyState().authentication
 
     function handleForm(event){
         event.preventDefault();
         let text = document.getElementById('question').value; 
-        let user = userAuth.getUser();
+        let user = userName;
         let data = {
             user: user, 
             category: match.params.subjectId, 
@@ -25,6 +28,7 @@ export default function Question({match}){
         if(text.endsWith('?') && text.length >= 10){
             axios.put('/question', data)
             .then(history.goBack())
+            .then(dispatch(fetchCategoryInfo(match.params.subjectId)))
             .catch(console.error())
         }
         else if(!text.endsWith('?') && text.length < 10){
@@ -51,13 +55,13 @@ export default function Question({match}){
     }
 
     return (
-        <div className="mt-5 w-75 mx-auto">
+        <div className="set-width mx-auto">
             <form id="question_form">
                 <div className="row mt-3 text-muted">
                     <div className="col">
                         <div className="text-danger small">{error.mark}</div>
                         <div className="mb-2 text-danger small">{error.length}</div>
-                        <label htmlFor="question" className="d-block">{userAuth.getUser().toUpperCase()}, enter your question:</label>
+                        <label htmlFor="question" className="d-block">{userName.toUpperCase()}, enter your question:</label>
                         <textarea id="question" name="question" className="p-3 mb-4" onChange={handleTextChange} rows="7" cols="56" required autoFocus></textarea>
                     </div>
                 </div>
@@ -66,4 +70,5 @@ export default function Question({match}){
             <Button variant="secondary" type="button" onClick={handleReturn} className="p-2">Back to Questions</Button>
         </div>
     )
-};
+}
+export default connect()(Question)
