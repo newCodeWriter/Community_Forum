@@ -1,28 +1,16 @@
 import React from 'react'
-import thunkMiddleware from 'redux-thunk'
-import { createLogger } from 'redux-logger'
 import ReactDOM from 'react-dom'
 import App from './App'
-import { createStore, applyMiddleware } from 'redux'
-import { composeWithDevTools } from 'redux-devtools-extension'
 import { Provider } from 'react-redux'
-import mathApp from './reducers/reducers'
+import configureStore from './configureStore'
+import { saveState } from './localStorage'
 import './index.css';
 
-const loggerMiddleware = createLogger()
+const store = configureStore()
 
-const store = createStore(mathApp, composeWithDevTools(
-  applyMiddleware(
-    thunkMiddleware, // lets us dispatch() functions
-    loggerMiddleware // neat middleware that logs actions
-  )
-));
-
-// const store = createStore(mathApp, applyMiddleware(
-//     thunkMiddleware, // lets us dispatch() functions
-//     loggerMiddleware // neat middleware that logs actions
-//   )
-// )
+store.subscribe(() => saveState({
+  authentication: store.getState().authentication
+}))
 
 ReactDOM.render(
   <Provider store={store}>

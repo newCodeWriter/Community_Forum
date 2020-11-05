@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 import Home from './components/home'
@@ -6,38 +6,29 @@ import Login from './components/login'
 import Error from './components/error'
 import PrivateRoute from './containers/private'
 import PublicRoute from './containers/public'
-import { getAuthorization } from './actions'
 
-class App extends Component{
+function App(){
 
-  componentDidMount(){
-    this.props.getAuth()
-  }
+  return (
+    <BrowserRouter>
+      <div>
+        <Switch>
+          <Route exact path="/" render={() => <Redirect to="/login"/>}/>
+          <PublicRoute exact path="/login" component={Login} />
+          <PrivateRoute path="/home" component={Home} />
+          <Route component={Error} />
+        </Switch>
+      </div>
+    </BrowserRouter>
+  )
+}
 
-  render() {
-    return (
-      <BrowserRouter forceRefresh={true}>
-        <div>
-          <Switch>
-            <Route exact path="/" render={() => <Redirect to="/login"/>}/>
-            <PublicRoute exact path="/login" component={Login} />
-            <PrivateRoute path="/home" component={Home} />
-            <Route component={Error} />
-          </Switch>
-        </div>
-      </BrowserRouter>
-    );
+const mapStateToProps = (state) => {
+  const { authentication, data_request } = state
+  return {
+    auth: authentication,
+    data: data_request
   }
 }
 
-const mapStateToProps = (state) => ({ 
-  user: state.authentication.userName 
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  getAuth: () => {
-    dispatch(getAuthorization())
-  }
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(mapStateToProps)(App);
