@@ -4,20 +4,27 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import FormControl from 'react-bootstrap/FormControl'
 import Form from 'react-bootstrap/Form'
 import axios from 'axios'
+import { connect } from 'react-redux'
 import { useHistory } from 'react-router-dom';
-import { userAuth } from '../checkAuth';
+import { copyState } from '../localStorage';
+import { changeUser, logout } from '../actions'
 
-export default function ChangeAcct({match}){
+function ChangeAcct({ dispatch }){
     const [ state, setState ] = useState({
         pw_action: false,
         user_action: false, 
         delete_action: false,
         user_error: '',
         user_ok: '',
-        pw_error: ''
+        pw_error: '', 
+        pwd_test_error: false,
+        disabled: true, 
+        validate: false
     })
 
     let history = useHistory();
+
+    const { userName } = copyState().authentication;
 
     function handleSelect(event){
         if(event.target.value === 'change password'){
@@ -27,7 +34,10 @@ export default function ChangeAcct({match}){
                 delete_action: false,
                 user_error: '',
                 user_ok: '',
-                pw_error: ''
+                pw_error: '',
+                pwd_test_error: false,
+                disabled: true,
+                validate: false
             })
         }
         else if(event.target.value === 'change username'){
@@ -37,7 +47,10 @@ export default function ChangeAcct({match}){
                 delete_action: false,
                 user_error: '',
                 user_ok: '',
-                pw_error: ''
+                pw_error: '',
+                pwd_test_error: false,
+                disabled: true,
+                validate: false
             })
         }
         else if(event.target.value === 'delete account'){
@@ -47,7 +60,10 @@ export default function ChangeAcct({match}){
                 delete_action: true,
                 user_error: '',
                 user_ok: '',
-                pw_error: ''
+                pw_error: '',
+                pwd_test_error: false,
+                disabled: true, 
+                validate:false
             })
         }
         else{
@@ -57,93 +73,166 @@ export default function ChangeAcct({match}){
                 delete_action: false,
                 user_error: '',
                 user_ok: '',
-                pw_error: ''
+                pw_error: '', 
+                pwd_test_error: false,
+                disabled: true,
+                validate:false
             })
         }
     }
 
     function handleCheck(){
-        const current_name = userAuth.getUser();
+        const current_name = userName;
         const new_name = document.getElementById('new_name').value.toLowerCase();
         if(new_name.length >= 4 && new_name !== current_name){
             axios.get(`/check/${new_name}`)
             .then(res => {
                 if(res.data === 'ok'){
-                    setState({
-                        pw_action: false,
-                        user_action: true, 
-                        delete_action: false,
-                        user_error: '',
-                        user_ok: 'This username is available.',
-                        pw_error: ''
-                    })
+                    setState(prevState => {
+                        return {
+                            ...prevState, 
+                            user_ok: 'This username is available.',
+                            disabled: false 
+                        };
+                    });
                 }
                 else if(res.data === 'not available'){
-                    setState({
-                        pw_action: false,
-                        user_action: true, 
-                        delete_action: false,
-                        user_error: 'This username is not available. Please try another.',
-                        user_ok: '',
-                        pw_error: ''
-                    })
+                    setState(prevState => {
+                        return {
+                            ...prevState, 
+                            user_error: 'This username is not available. Please try another.'
+                        };
+                    });
                 }
             })
             .catch(err => console.error(err.message))
         }
         else if(new_name.length < 4){
-            setState({
-                pw_action: false,
-                user_action: true, 
-                delete_action: false,
-                user_error: 'Username must be at least 4 characters.',
-                user_ok: '',
-                pw_error: ''
-            })
+            setState(prevState => {
+                return {
+                    ...prevState, 
+                    user_error: 'Username must be at least 4 characters.'
+                };
+            });
         }
         else if(new_name === current_name){
-            setState({
-                pw_action: false,
-                user_action: true, 
-                delete_action: false,
-                user_error: 'The name you entered matches your current username.',
-                user_ok: '',
-                pw_error: ''
-            })
+            setState(prevState => {
+                return {
+                    ...prevState, 
+                    user_error: 'The name you entered matches your current username.'
+                };
+            });
+        }
+    }
+
+    function handleSubmit(event){
+        event.preventDefault();
+        setState(prevState => {
+            return {
+                ...prevState, 
+                validate: true
+            };
+        });
+        if(event.target.name === 'userBtn'){
+            var newName = document.getElementById('new_name').value.toLowerCase();
+            dispatch(changeUser(userName, newName));
+            history.replace('/');
+        }
+        else if(event.target.name === 'pwdBtn'){
+            const patt = new RegExp("(?=.*[A-Za-z])(?=.*[0-9])(?=.*[@$!%*#?&]).{8,}");
+            const oldPwd = document.getElementById('oldPwd').value;
+            var newPwd = document.getElementById('newPwd').value;
+            var conPwd = document.getElementById('conPwd').value;
+            const pwd_test = patt.test(newPwd);
+
+            if(pwd_test && oldPwd !== newPwd && newPwd === conPwd){
+                var update_pwd = {
+                    user: userName,
+                    old_pwd: oldPwd,
+                    new_pwd: newPwd
+                }
+    
+                axios.put(`/update/password`, update_pwd)
+                .then(res => {
+                    if(res.data === 'wrong password'){
+                        setState(prevState => {
+                            return {
+                                ...prevState, 
+                                pw_error: 'You have entered an incorrect password.'
+                            };
+                        });
+                    }
+                    else{
+                        console.log(res.data)
+                        document.getElementById('pwd-form').reset();
+                        setState(prevState => {
+                            return {
+                                ...prevState, 
+                                validate: false
+                            };
+                        });
+                    }
+                })
+                .catch(err => { console.log(err) })
+            }
+            else if(newPwd.length >= 4 && oldPwd === newPwd){
+                setState(prevState => {
+                    return {
+                        ...prevState, 
+                        pw_error: 'Your new password matches your old password. Please enter a new password.'
+                    };
+                });
+            }
+            else if(!pwd_test){
+                setState(prevState => {
+                    return {
+                        ...prevState, 
+                        pwd_test_error: true
+                    };
+                });
+            }
+            else{
+                setState(prevState => {
+                    return {
+                        ...prevState, 
+                        pw_error: 'Your passwords do not match.',
+                    };
+                });
+            }
+        }
+        else if(event.target.name === 'delBtn'){
+            axios.delete(`/delete/${userName}`)
+            .then(dispatch(logout()))
+            .then(window.location.reload())
+            .catch(err => console.log(err))
         }
     }
    
-
-    // function handleReturn(){
-    //     history.goBack()
-    // }
     function handleTextChange(){
         const action = document.getElementById('actions').value;
         if(action === 'change username'){
-            setState({
-                pw_action: false,
-                user_action: true, 
-                delete_action: false,
-                user_error: '',
-                user_ok: '',
-                pw_error: ''
-            })
+            setState(prevState => {
+                return {
+                    ...prevState, 
+                    user_error: '',
+                    disabled: true
+                };
+            });
         }
         else if(action === 'change password'){
-            setState({
-                pw_action: true,
-                user_action: false, 
-                delete_action: false,
-                user_error: '',
-                user_ok: '',
-                pw_error: ''
-            })
+            setState(prevState => {
+                return {
+                    ...prevState, 
+                    pw_error: '',
+                    pwd_test_error: false
+                };
+            });
         }
     }
 
     return (
         <div className="w-50 ml-5">
-            <h3 className="mb-4">{userAuth.getUser().toUpperCase()}, select an action:</h3>
+            <h3 className="mb-4">{userName.toUpperCase()}, select an action:</h3>
             <Form.Control as="select" custom className="mb-5 w-50" defaultValue="" onChange={handleSelect} id="actions">
                 <option value="action"></option>
                 <option value="change username">Change Username</option>
@@ -154,42 +243,54 @@ export default function ChangeAcct({match}){
             ? <Form>
                 <Form.Group className="mt-2">
                     <Form.Label>Current Username:</Form.Label>
-                    <Form.Control type="text" className="mb-3" placeholder={userAuth.getUser()} readOnly />
+                    <Form.Control type="text" className="mb-3" placeholder={userName} readOnly />
                 </Form.Group>
                 <Form.Label>New Username:</Form.Label>
                 <InputGroup className="mb-1">
                     <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange}/>
                     <InputGroup.Append>
-                        <Button variant="secondary" onClick={handleCheck}>Check?</Button>
+                        <Button variant="outline-secondary" onClick={handleCheck}>Check?</Button>
                     </InputGroup.Append>
                 </InputGroup>
                 <div className="text-success small">{state.user_ok}</div>
                 <div className="text-danger small">{state.user_error}</div>
-                <Button variant="primary" type="button" className="mr-2 mt-4 p-2">Submit</Button>
+                <Button variant="primary" name="userBtn" type="button" className="mr-2 mt-4 p-2" disabled={state.disabled} onClick={handleSubmit}>Submit</Button>
               </Form>
             : null
             }
             {state.pw_action === true 
-            ? <Form>
+            ? <Form id="pwd-form" validated={state.validate}>
                 <Form.Group>
                     <Form.Label>Current Password:</Form.Label>
-                    <Form.Control type="password" className="mb-3" placeholder="Old Password" onChange={handleTextChange}/>
+                    <Form.Control type="password" id="oldPwd" className="mb-3" placeholder="Old Password" onChange={handleTextChange} required/>
                     <Form.Label>New Password:</Form.Label>
-                    <Form.Control type="password" className="mb-3" placeholder="New Password" onChange={handleTextChange}/>
+                    <Form.Control type="password" id="newPwd" className="mb-3" placeholder="New Password" onChange={handleTextChange} required/>
                     <Form.Label>Confirm Password:</Form.Label>
-                    <Form.Control type="password" placeholder="Confirm Password" onChange={handleTextChange}/>
+                    <Form.Control type="password" id="conPwd" placeholder="Confirm Password" onChange={handleTextChange} required/>
+                    <div className="text-danger small">{state.pw_error}</div>
+                    {state.pwd_test_error 
+                    ? <ul className="text-danger small errors">
+                        Your password must contain: 
+                        <li className="pwd-error">At least eight characters</li>
+                        <li className="pwd-error">At least one letter</li>
+                        <li className="pwd-error">At least one number</li>
+                        <li className="pwd-error">At least one special character</li>
+                    </ul>
+                    : <div></div>
+                    }
                 </Form.Group>
-                <Button variant="primary" type="button">Submit</Button>
+                <Button variant="primary" className="mt-3" name="pwdBtn" type="button" onClick={handleSubmit}>Submit</Button>
               </Form>
             : null
             }
             {state.delete_action === true 
             ? <div>
                 <h4 className="mb-4">Are you sure you want to delete your account?</h4>
-                <Button variant="danger" type="button" className="mr-3">Confirm</Button>
+                <Button variant="danger" name="delBtn" type="button" className="mr-3" onClick={handleSubmit}>Confirm</Button>
               </div>
             : null
             }
         </div>
     )
-};
+}
+export default connect()(ChangeAcct);
