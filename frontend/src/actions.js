@@ -1,4 +1,4 @@
-import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA, GET_AUTH, UPDATE_USER } from './constants'
+import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA, UPDATE_USER } from './constants'
 import axios from 'axios'
 
 let counter = 1
@@ -71,10 +71,6 @@ export function fetchAnswers(id){
       .catch(err => console.log(err));
   };
 }
-
-export const getAuthorization = () => ({
-  type: GET_AUTH
-})
 
 export function changeUser(old_name, new_name){
   return async (dispatch) => {
