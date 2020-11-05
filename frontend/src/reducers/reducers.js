@@ -1,7 +1,7 @@
-import { LOGIN_USER_SUCCESS, LOGIN_USER_FAILURE, LOGOUT_USER, FETCH_DATA, GET_AUTH } from '../constants';
+import { LOGIN_USER_SUCCESS, LOGIN_USER_FAILURE, LOGOUT_USER, FETCH_DATA, GET_AUTH, UPDATE_USER } from '../constants';
 import { combineReducers } from 'redux'
 import decode from 'jwt-decode'
-import { userAuth } from '../checkAuth'
+import { userAuth } from '../localStorage'
 
 const userInfo = {
     isAuthenticated: false, 
@@ -46,6 +46,10 @@ const authentication = (state = userInfo, action) => {
             return {...state, 
                 isAuthenticated: userAuth.loggedIn(), 
                 loggedIn: userAuth.loggedIn()
+            }
+        case UPDATE_USER:
+            return {...state,
+                userName: action.payload
             }
         default:
             return state

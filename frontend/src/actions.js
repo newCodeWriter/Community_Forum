@@ -1,4 +1,4 @@
-import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA, GET_AUTH } from './constants'
+import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA, GET_AUTH, UPDATE_USER } from './constants'
 import axios from 'axios'
 
 let counter = 1
@@ -39,7 +39,7 @@ export function loginUserFailure(error) {
 }
 
 export function logout() {
-  localStorage.removeItem('token');
+  localStorage.clear();
   return {
       type: LOGOUT_USER
   }
@@ -83,7 +83,14 @@ export function changeUser(old_name, new_name){
       new_name: new_name
     }
     axios.put(`/update/user`, data)
-    .then(dispatch(fetchData(new_name)))
+    .then(dispatch(updateUser(new_name)))
     .catch(err => console.log(err));
   };
+}
+
+export function updateUser(name) {
+  return{
+    type: UPDATE_USER,
+    payload: name
+  }
 }
