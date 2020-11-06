@@ -72,7 +72,7 @@ app.post('/answer', async (req, res) => {
             connection.query(add_answer, values, (err, row) => {
                 if(err) throw err; 
                 else{
-                    res.send('Your answer has been submitted.')
+                    res.send('answer submitted.')
                     console.log('Answer submitted.')
                 }
             })

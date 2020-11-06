@@ -56,9 +56,15 @@ class Post extends Component {
         }
         if(text.length >= 5){
             axios.post('/answer', data)
-            // find a way to have the server return the new answer and then add it to this.state.answers
+            .then(res => {
+                if(res.data === 'answer submitted.'){
+                    this.props.dispatch(fetchAnswers(this.props.match.params.questionId))
+                }
+                else{
+                    console.log('there is a delay.')
+                }
+            })
             .then(this.setState({show: false}))
-            .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
             .catch(err => console.log(err))
         }
         else{
