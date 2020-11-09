@@ -15,6 +15,7 @@ function ChangeAcct({ dispatch }){
         user_action: false, 
         delete_action: false,
         user_error: '',
+        user_test_error: false,
         user_ok: '',
         pw_error: '', 
         pwd_test_error: false,
@@ -32,6 +33,7 @@ function ChangeAcct({ dispatch }){
                 user_action: false, 
                 delete_action: false,
                 user_error: '',
+                user_test_error: false,
                 user_ok: '',
                 pw_error: '',
                 pwd_test_error: false,
@@ -44,6 +46,7 @@ function ChangeAcct({ dispatch }){
                 user_action: true, 
                 delete_action: false,
                 user_error: '',
+                user_test_error: false,
                 user_ok: '',
                 pw_error: '',
                 pwd_test_error: false,
@@ -56,6 +59,7 @@ function ChangeAcct({ dispatch }){
                 user_action: false, 
                 delete_action: true,
                 user_error: '',
+                user_test_error: false,
                 user_ok: '',
                 pw_error: '',
                 pwd_test_error: false,
@@ -68,6 +72,7 @@ function ChangeAcct({ dispatch }){
                 user_action: false, 
                 delete_action: false,
                 user_error: '',
+                user_test_error: false,
                 user_ok: '',
                 pw_error: '', 
                 pwd_test_error: false,
@@ -79,7 +84,9 @@ function ChangeAcct({ dispatch }){
     function handleCheck(){
         const current_name = userName;
         const new_name = document.getElementById('new_name').value.toLowerCase();
-        if(new_name !== current_name){
+        const user_patt = new RegExp("^(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}$");
+        const user_test = user_patt.test(new_name);
+        if(user_test && new_name !== current_name){
             axios.get(`/check/${new_name}`)
             .then(res => {
                 if(res.data === 'ok'){
@@ -109,6 +116,14 @@ function ChangeAcct({ dispatch }){
                     user_error: 'The name you entered matches your current username.'
                 };
             });
+        }
+        else{
+            setState(prevState => {
+                return {
+                    ...prevState, 
+                    user_test_error: true
+                };
+            }); 
         }
     }
 
@@ -186,7 +201,6 @@ function ChangeAcct({ dispatch }){
         else if(event.target.name === 'delBtn'){
             axios.delete(`/delete/${userName}`)
             .then(dispatch(logout()))
-            .then(window.location.reload())
             .catch(err => console.log(err))
         }
     }
@@ -198,6 +212,8 @@ function ChangeAcct({ dispatch }){
                 return {
                     ...prevState, 
                     user_error: '',
+                    user_ok: '',
+                    user_test_error: false,
                     disabled: true
                 };
             });
@@ -230,13 +246,22 @@ function ChangeAcct({ dispatch }){
                 </Form.Group>
                 <Form.Label>New Username:</Form.Label>
                 <InputGroup className="mb-1">
-                    <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange} pattern="(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}" title="You must enter at least 4 characters consisting of at least 2 letters with no spaces."/>
+                    <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange}/>
                     <InputGroup.Append>
                         <Button variant="outline-secondary" onClick={handleCheck}>Check?</Button>
                     </InputGroup.Append>
                 </InputGroup>
                 <div className="text-success small">{state.user_ok}</div>
                 <div className="text-danger small">{state.user_error}</div>
+                {state.user_test_error 
+                ? <ul className="text-danger small errors">
+                    Your username must have: 
+                    <li className="reg-error">At least four characters</li>
+                    <li className="reg-error">At least two letters</li>
+                    <li className="reg-error">No spaces</li>
+                </ul>
+                : <div></div>
+                }
                 <Button variant="primary" name="userBtn" type="button" className="mr-2 mt-4 p-2 mb-3" disabled={state.disabled} onClick={handleSubmit}>Submit</Button>
               </Form>
             : null

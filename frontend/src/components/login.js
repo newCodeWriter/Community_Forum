@@ -16,6 +16,7 @@ class Login extends Component {
             reg_pwd2: '',
             reg_confirmed: false,
             reg_user_error: false,
+            reg_user_test_error: false,
             reg_pwd_error: false,
             reg_pwd_test_error: false,
             reg_pwd_match_error: false,
@@ -47,6 +48,7 @@ class Login extends Component {
         this.setState({[name]: val});
         this.setState({
             reg_user_error: false, 
+            reg_user_test_error: false,
             reg_pwd_test_error: false, 
             reg_pwd_match_error: false, 
             log_user_error: false, 
@@ -57,14 +59,15 @@ class Login extends Component {
 
     handleRegister = (event) => {
         event.preventDefault();
-        const patt = new RegExp("(?=.*[A-Za-z])(?=.*[0-9])(?=.*[@$!%*#?&]).{8,}");
-        const pwd_test = patt.test(this.state.reg_pwd1);
-        if(pwd_test && this.state.reg_pwd1 === this.state.reg_pwd2){
+        const pwd_patt = new RegExp("(?=.*[A-Za-z])(?=.*[0-9])(?=.*[@$!%*#?&]).{8,}");
+        const pwd_test = pwd_patt.test(this.state.reg_pwd1);
+        const user_patt = new RegExp("^(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}$");
+        const user_test = user_patt.test(this.state.reg_user);
+        if(user_test && pwd_test && this.state.reg_pwd1 === this.state.reg_pwd2){
             var new_user = {
                 user: this.state.reg_user,
                 password: this.state.reg_pwd1
             }
-
             axios.post(`/register`, new_user)
             .then(res => {
                 if(res.status === 201){
@@ -84,9 +87,8 @@ class Login extends Component {
                 }
             })
         }
-        else if(!pwd_test && this.state.reg_pwd1 !== this.state.reg_pwd2){
-            this.setState({reg_pwd_match_error: true});
-            this.setState({reg_pwd_test_error: true});
+        else if(!user_test){
+            this.setState({reg_user_test_error: true})
         }
         else if(!pwd_test){
             this.setState({reg_pwd_test_error: true});
@@ -171,8 +173,17 @@ class Login extends Component {
                                 <form onSubmit={this.handleRegister} id="register-form">
                                     <h4 className="mb-4">Register</h4>
                                     <div className="input-group">
-                                        <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} pattern="(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}" title="You must enter at least 4 characters consisting of at least 2 letters with no spaces." required disabled={reg_disabled} />
+                                        <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} required disabled={reg_disabled} />
                                     </div>
+                                    { this.state.reg_user_test_error 
+                                    ? <ul className="text-danger small errors">
+                                        Your username must have: 
+                                        <li className="reg-error">At least four characters</li>
+                                        <li className="reg-error">At least two letters</li>
+                                        <li className="reg-error">No spaces</li>
+                                    </ul>
+                                    : <div></div>
+                                    }
                                     {this.state.reg_user_error
                                     ? <div className="text-danger small errors">This user already exists. Please try another username.</div>
                                     : <div></div>
