@@ -6,6 +6,7 @@ const userInfo = {
     isAuthenticated: false, 
     token: null,
     userName: null,
+    userId: null, 
     loggedIn: false, 
     statusText: null,
     loginAttempts: 0
@@ -18,6 +19,7 @@ const authentication = (state = userInfo, action) => {
                 isAuthenticated: true, 
                 token: action.payload.token,
                 userName: decode(action.payload.token).name,
+                userId: decode(action.payload.token).id,
                 loggedIn: true,
                 statusText: 'You have been successfully logged in.'
             }

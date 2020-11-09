@@ -18,6 +18,7 @@ class Post extends Component {
             length_error: '',
             answers: [],
             username: copyState().authentication.userName,
+            user_id: copyState().authentication.userId,
             edit_btn: false,
             answer_id: null,
             answer_text: null, 
@@ -50,7 +51,7 @@ class Post extends Component {
         var replace = text.replace(/(\r\n|\r)/gm,"\n");
         
         var data = {
-            user: this.state.username,
+            user: this.state.user_id,
             id: this.props.match.params.questionId,
             answer: replace
         }

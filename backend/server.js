@@ -38,67 +38,39 @@ app.get('/category/:category', async (req, res) => {
 
 app.put('/question', async (req, res) => {
     const sql = `INSERT INTO Questions(user_id, category, question) VALUES(?, ?, ?)`;
-    const que = `SELECT user_id FROM Users WHERE username = ?`
-    // first, get user id
-    connection.query(que, [req.body.user], (err, rows) => {
-        if(err) throw err;
-        else{
-            const user_id = rows[0].user_id;
-            const values = [user_id, req.body.category, req.body.question];
-            if(subjects.includes(req.body.category)){
-                connection.query(sql, values, (err, rows) => {
-                    if(err) throw err;
-                    else{
-                        res.send('Your question has been submitted.')
-                        console.log('Question submitted.')
-                    }
-                })
-            }
+    const values = [req.body.user, req.body.category, req.body.question];
+    if(subjects.includes(req.body.category)){
+        connection.query(sql, values, (err, row) => {
+            if(err) throw err;
             else{
-                res.sendStatus(400)
+                res.send('Your question has been submitted.')
+                console.log('Question submitted.')
             }
-        }
-    })
-});
+        })
+    }
+    else{
+        res.sendStatus(400)
+    }
+})
 
 app.post('/answer', async (req, res) => {
-    const get_user_id = `SELECT user_id FROM Users WHERE username = ?`;
-    const add_answer = `INSERT INTO Responses(user_id, question_id, response) VALUES(?, ?, ?) ` 
-    connection.query(get_user_id, [req.body.user], (err, row) => {
+    const add_answer = `INSERT INTO Responses(user_id, question_id, response) VALUES(?, ?, ?) `
+    const values = [req.body.user, req.body.id, req.body.answer]
+    connection.query(add_answer, values, (err, row) => {
         if(err) throw err; 
         else{
-            const userId = row[0].user_id;
-            const values = [userId, req.body.id, req.body.answer]
-            connection.query(add_answer, values, (err, row) => {
-                if(err) throw err; 
-                else{
-                    res.send('answer submitted.')
-                    console.log('Answer submitted.')
-                }
-            })
-            
+            res.send('answer submitted.')
+            console.log('Answer submitted.')
         }
     })
 })
 
 app.get('/post/:questionId', async (req, res) => {
-    const sql = `SELECT submit_user, question_id, question, question_date, answer_user, response_id, response, response_date FROM (SELECT question_id, username AS submit_user, question, DATE_FORMAT(question_date,"%b %e '%y at %l:%i %p") AS question_date FROM Questions INNER JOIN Users USING (user_id) WHERE question_id = ?) AS user_question INNER JOIN (SELECT question_id, username AS answer_user, id AS response_id, response, DATE_FORMAT(response_date, "%b %e '%y at %l:%i %p") AS response_date FROM Responses INNER JOIN Users USING (user_id) WHERE question_id = ?) AS answers USING (question_id);`
-    // const sql = `SELECT username AS answer_user, response, DATE_FORMAT(response_date, "%b %e '%y at %l:%i %p") AS response_date FROM Responses INNER JOIN Users USING (user_id) WHERE question_id = ?`
+    const sql = `SELECT submit_user, question_id, question, question_date, answer_user, response_id, response, response_date FROM (SELECT question_id, username AS submit_user, question, DATE_FORMAT(question_date,"%b %e '%y at %l:%i %p") AS question_date FROM Questions INNER JOIN Users USING (user_id) WHERE question_id = ?) AS user_question LEFT JOIN (SELECT question_id, username AS answer_user, id AS response_id, response, DATE_FORMAT(response_date, "%b %e '%y at %l:%i %p") AS response_date FROM Responses INNER JOIN Users USING (user_id) WHERE question_id = ?) AS answers USING (question_id);`
     connection.query(sql, [req.params.questionId, req.params.questionId], (err, rows) => {
         if(err) throw err; 
         else{
-            const no_answer = `SELECT username as submit_user, question_id, question, DATE_FORMAT(question_date,"%b %e '%y at %l:%i %p") AS question_date FROM Questions INNER JOIN Users USING (user_id) WHERE question_id = ?`
-            if(rows.length === 0){
-                connection.query(no_answer, [req.params.questionId], (err, row) => {
-                    if(err) throw err; 
-                    else{
-                        res.send(row)
-                    }
-                })
-            }
-            else{
-                res.send(rows)
-            }
+            res.send(rows)
         }
     })
 })
@@ -184,13 +156,17 @@ app.post('/login', async (req, res) =>{
             }
             else{
                 let username = rows[0].username;
+                let id = rows[0].user_id;
                 let pwd = rows[0].password;
                 bcrypt.compare(req.body.password, pwd, (error, bool) => {
                     if(error) {throw new error('something went wrong.') }
                     else{
                         if(bool){
                             // create access token for user
-                            const user = {name: username};
+                            const user = {
+                                name: username,
+                                id: id
+                            };
                             const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 1500 });
                             res.json({accessToken: accessToken});
                         }

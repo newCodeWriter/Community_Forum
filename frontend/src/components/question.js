@@ -14,14 +14,14 @@ function Question({ match, dispatch }){
 
     const history = useHistory();
 
-    const { userName } = copyState().authentication
+    const { userName, userId } = copyState().authentication
 
     function handleForm(event){
         event.preventDefault();
         let text = document.getElementById('question').value; 
-        let user = userName;
+        let user_id = userId;
         let data = {
-            user: user, 
+            user: user_id, 
             category: match.params.subjectId, 
             question: text
         }
