@@ -79,7 +79,7 @@ function ChangeAcct({ dispatch }){
     function handleCheck(){
         const current_name = userName;
         const new_name = document.getElementById('new_name').value.toLowerCase();
-        if(new_name.length >= 4 && new_name !== current_name){
+        if(new_name !== current_name){
             axios.get(`/check/${new_name}`)
             .then(res => {
                 if(res.data === 'ok'){
@@ -101,14 +101,6 @@ function ChangeAcct({ dispatch }){
                 }
             })
             .catch(err => console.error(err.message))
-        }
-        else if(new_name.length < 4){
-            setState(prevState => {
-                return {
-                    ...prevState, 
-                    user_error: 'Username must be at least 4 characters.'
-                };
-            });
         }
         else if(new_name === current_name){
             setState(prevState => {
@@ -238,7 +230,7 @@ function ChangeAcct({ dispatch }){
                 </Form.Group>
                 <Form.Label>New Username:</Form.Label>
                 <InputGroup className="mb-1">
-                    <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange}/>
+                    <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange} pattern="(?=.*[A-Za-z].*[A-Za-z]).{4,}" title="You must enter at least 4 characters with at least two letter characters."/>
                     <InputGroup.Append>
                         <Button variant="outline-secondary" onClick={handleCheck}>Check?</Button>
                     </InputGroup.Append>

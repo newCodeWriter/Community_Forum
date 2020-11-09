@@ -171,7 +171,7 @@ class Login extends Component {
                                 <form onSubmit={this.handleRegister} id="register-form">
                                     <h4 className="mb-4">Register</h4>
                                     <div className="input-group">
-                                        <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} minLength="4" required disabled={reg_disabled} />
+                                        <input type="text" className="form-control reg" name="reg_user" id="reg_user" placeholder="Username" onChange={this.handleInputChange} pattern="(?=.*[A-Za-z].*[A-Za-z]).{4,}" title="You must enter at least 4 characters with at least two letter characters." required disabled={reg_disabled} />
                                     </div>
                                     {this.state.reg_user_error
                                     ? <div className="text-danger small errors">This user already exists. Please try another username.</div>
