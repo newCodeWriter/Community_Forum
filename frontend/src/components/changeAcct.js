@@ -230,7 +230,7 @@ function ChangeAcct({ dispatch }){
                 </Form.Group>
                 <Form.Label>New Username:</Form.Label>
                 <InputGroup className="mb-1">
-                    <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange} pattern="(?=.*[A-Za-z].*[A-Za-z]).{4,}" title="You must enter at least 4 characters with at least two letter characters."/>
+                    <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange} pattern="(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}" title="You must enter at least 4 characters consisting of at least 2 letters with no spaces."/>
                     <InputGroup.Append>
                         <Button variant="outline-secondary" onClick={handleCheck}>Check?</Button>
                     </InputGroup.Append>
