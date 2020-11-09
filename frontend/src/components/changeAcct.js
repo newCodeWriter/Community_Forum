@@ -248,7 +248,7 @@ function ChangeAcct({ dispatch }){
                 <InputGroup className="mb-1">
                     <FormControl placeholder="New Username" id="new_name" onChange={handleTextChange}/>
                     <InputGroup.Append>
-                        <Button variant="outline-secondary" onClick={handleCheck}>Check?</Button>
+                        <Button onClick={handleCheck} title="check if username is available"><i class="fas fa-search pl-2 pr-2"></i></Button>
                     </InputGroup.Append>
                 </InputGroup>
                 <div className="text-success small">{state.user_ok}</div>

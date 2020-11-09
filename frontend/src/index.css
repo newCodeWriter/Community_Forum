@@ -53,6 +53,9 @@ a{
 .set-width{
   width: 85%;
 }
+.fas{
+  cursor: pointer;
+}
 
 /* media queries */
 @media (max-width: 576px){

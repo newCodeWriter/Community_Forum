@@ -209,7 +209,7 @@ class Post extends Component {
                     </div>
                     }
                 <div className="row mt-4 w-100">
-                    {this.state.answers.length === 1 && this.state.answers[0].answer_user === undefined ? null : <div className="col mb-2">Answers:</div>}
+                    {this.state.answers.length === 1 && this.state.answers[0].answer_user === null ? null : <div className="col mb-2">Answers:</div>}
                 </div>
                 {this.state.answers.map((answer) => (
                     <div key={`answer_${answer.response_id}`}>
@@ -229,7 +229,7 @@ class Post extends Component {
                             </div> 
                         </div>
                         }
-                        {this.state.answers[0].answer_user === undefined ? null :
+                        {this.state.answers[0].answer_user === null ? null :
                             <div>
                                 <div className="row">
                                     <div className="font-weight-bold text-right small col">answered {answer.response_date} by <span className="text-success">{answer.answer_user}</span></div>
