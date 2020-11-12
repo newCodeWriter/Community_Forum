@@ -192,7 +192,7 @@ export const getRegistration = async (reg) => {
                 if(err) throw err;
                 else{ 
                     if(row.length > 0) resolve(409);
-                    else registerUser(new_user, hashPwd);
+                    else resolve(registerUser(new_user, hashPwd));
                 }
             })
         })
@@ -311,7 +311,6 @@ export const updatePwd = async (pwd) => {
     let conn = await setConnection();
     const { old_pwd, new_pwd, user } = pwd;
     const pwd_query = `SELECT password FROM Users WHERE username = ?`;
-    const update = `UPDATE Users SET password = ? WHERE username = ?`;
     const new_hashPwd = await bcrypt.hash(new_pwd, 10);
     try{
         return new Promise((resolve, reject) => {
@@ -322,13 +321,8 @@ export const updatePwd = async (pwd) => {
                     bcrypt.compare(old_pwd, db_pwd, (error, result) => {
                         if(error) throw error; 
                         else{
-                            if(result){
-                                conn.query(update, [new_hashPwd, user], (err, result) => {
-                                    if(err) throw err ; 
-                                    else resolve(1);
-                                })
-                            }
-                            else resolve(0);
+                            if(!result) resolve(0);
+                            else resolve(setNewPwd(user, new_hashPwd));
                         }
                     })
                 }
@@ -337,6 +331,24 @@ export const updatePwd = async (pwd) => {
     }
     catch(err){
         return new Promise((resolve, reject) => { reject(`error in updatePwd: ${err}`) })
+    }
+    finally{
+        if(conn) conn.end();
+    }
+}
+
+const setNewPwd = async (user, pwd) => {
+    let conn = await setConnection();
+    const update = `UPDATE Users SET password = ? WHERE username = ?`;
+    try{
+        return new Promise((resolve, reject) => {
+            conn.query(update, [pwd, user], (err, result) => {
+                resolve(1);
+            })
+        })
+    }
+    catch(err){
+        return new Promise((resolve, reject) => { reject(`error in setNewPwd: ${err}`) })
     }
     finally{
         if(conn) conn.end();

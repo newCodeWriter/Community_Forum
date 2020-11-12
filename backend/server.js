@@ -87,7 +87,10 @@ app.put('/update/user', async (req, res) => {
 
 app.put('/update/password', async (req, res) => {
     let data = await updatePwd(req.body);
-    if(data === 1) console.log(`Password for ${req.body.user} has been updated.`);
+    if(data === 1) {
+        console.log(`Password for ${req.body.user} has been changed.`);
+        res.send('password changed')
+    }
     else res.send('wrong password');
 })
 
