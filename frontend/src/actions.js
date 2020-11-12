@@ -67,8 +67,8 @@ export function fetchAnswers(id){
     axios.get(`/post/${id}`)
     .then(res => {
         dispatch(fetchData(res.data))
-      })
-      .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
   };
 }
 

@@ -58,7 +58,7 @@ class Post extends Component {
         if(text.length >= 5){
             axios.post('/answer', data)
             .then(res => {
-                if(res.data === 'answer submitted.'){
+                if(res.data === 'answer submitted'){
                     this.props.dispatch(fetchAnswers(this.props.match.params.questionId))
                 }
                 else{
@@ -102,7 +102,14 @@ class Post extends Component {
             
             axios.put(`/update/answer/${id}`, data)
             .then(this.setState({show: false}))
-            .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
+            .then(res => {
+                if(res.data === 'answer updated'){
+                    this.props.dispatch(fetchAnswers(this.props.match.params.questionId))
+                }
+                else{
+                    console.log('there is a delay.')
+                }
+            })
             .catch(err => console.log(err))
         }
         else if(original === update){
@@ -118,7 +125,12 @@ class Post extends Component {
             var question_id = this.props.match.params.questionId;
             axios.delete(`/delete/question/${question_id}`)
             .then(this.setState({redirect: true}))
-            .then(this.props.dispatch(fetchCategoryInfo(this.props.match.params.subjectId)))
+            .then(res => {
+                if(res.data === 'question deleted'){
+                    this.props.dispatch(fetchCategoryInfo(this.props.match.params.subjectId))
+                }
+                else{ console.log('there is a delay.') }
+            })
             .catch(err => console.log(err))
         }
         else{
@@ -128,7 +140,12 @@ class Post extends Component {
             copy.splice(index,1);
     
             axios.delete(`/delete/answer/${answer_id}`)
-            .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
+            .then(res => {
+                if(res.data === 'answer deleted'){
+                    this.props.dispatch(fetchAnswers(this.props.match.params.questionId))
+                }
+                else{ console.log('there is a delay.') }
+            })
             .catch(err => console.log(err))
         }
     }
@@ -149,7 +166,12 @@ class Post extends Component {
             if(update.endsWith('?') && update.length >= 10){
                 axios.put(`/update/question/${id}`, data)
                 .then(this.setState({show_question: false}))
-                .then(this.props.dispatch(fetchAnswers(this.props.match.params.questionId)))
+                .then(res => {
+                    if(res.data === 'question updated'){
+                        this.props.dispatch(fetchAnswers(this.props.match.params.questionId))
+                    }
+                    else{ console.log('there is a delay.') }
+                })
                 .catch(console.error())
             }
             else if(!update.endsWith('?') && update.length < 10){

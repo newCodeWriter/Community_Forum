@@ -26,7 +26,7 @@ function Question({ match, dispatch }){
             question: text
         }
         if(text.endsWith('?') && text.length >= 10){
-            axios.put('/question', data)
+            axios.post('/question', data)
             .then(history.goBack())
             .then(dispatch(fetchCategoryInfo(match.params.subjectId)))
             .catch(console.error())
