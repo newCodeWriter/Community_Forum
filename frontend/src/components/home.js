@@ -4,21 +4,29 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
-import { Route, Switch, NavLink } from 'react-router-dom';
 import Dropdown from 'react-bootstrap/Dropdown';
 import NavItem from 'react-bootstrap/NavItem';
+import { Route, Switch, NavLink } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { fetchCategoryInfo, logout } from '../actions';
+import { copyState } from '../localStorage';
 import Subject from './subject';
 import Question from './question';
 import Post from './post';
 import ChangeAcct from './changeAcct';
+import DeleteAccount from './deleteAcct';
 import { math } from '../constants';
-import { connect } from 'react-redux';
-import { fetchCategoryInfo, logout } from '../actions';
-import { copyState } from '../localStorage';
+import axios from 'axios';
 
 const Home = ({ match, dispatch }) => {
 	const { userName } = copyState().authentication;
 	const handleLogout = () => dispatch(logout());
+	const deleteAccount = () => {
+		axios
+			.delete(`/delete/${userName}`)
+			.then(dispatch(logout()))
+			.catch((err) => console.log(err));
+	};
 
 	return (
 		<>
@@ -38,12 +46,9 @@ const Home = ({ match, dispatch }) => {
 							<Dropdown.Item href={`${match.url}/account`} className='profile'>
 								Account
 							</Dropdown.Item>
-							{/* add logout to dropdown for mobile devices */}
-							<Dropdown.Item
-								onClick={handleLogout}
-								className='d-block d-sm-none profile'
-							>
-								Logout
+							<Dropdown.Divider />
+							<Dropdown.Item href={`${match.url}/delete`} className='profile'>
+								Delete Account
 							</Dropdown.Item>
 						</Dropdown.Menu>
 					</Dropdown>
@@ -56,7 +61,7 @@ const Home = ({ match, dispatch }) => {
 					</Button>
 				</Nav>
 			</Navbar>
-			<div className='row w-100 m-0'>
+			<div id='main' className='row w-100 m-0'>
 				<div className='col-sm-5 col-md-4 col-lg-3 pl-0 pr-0'>
 					<Nav className='flex-column flex-c'>
 						{math.map(({ name, id }) => (
@@ -72,16 +77,17 @@ const Home = ({ match, dispatch }) => {
 						))}
 					</Nav>
 				</div>
-				<div className='col-sm-7 col-md-8 col-lg-9 mt-5'>
+				<div className='col-sm-7 col-md-8 col-lg-9 pl-5 pt-5'>
 					<Switch>
 						<Route
 							exact
 							path={`${match.path}`}
-							render={() => (
-								<h3 className='ml-5'>
-									Select a category to view its questions...
-								</h3>
-							)}
+							render={() => <h3>Select a category to view its questions...</h3>}
+						/>
+						<Route
+							exact
+							path={`${match.path}/delete`}
+							render={() => <DeleteAccount del={deleteAccount} />}
 						/>
 						<Route
 							path={`${match.path}/:subjectId/question`}
