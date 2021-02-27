@@ -28,8 +28,8 @@ const QuestionModal = ({
 
 	const handleUpdate = () => {
 		const original = question;
-		const data = { update: state.text };
-		if (original === state.text) {
+		const data = { update: state.text.trim() };
+		if (original === state.text.trim()) {
 			setState({
 				...state,
 				error: 'You have made no changes. Please update or press cancel.',
@@ -37,11 +37,12 @@ const QuestionModal = ({
 		} else if (state.text.endsWith('?') && state.text.length >= 10) {
 			axios
 				.put(`/update/question/${questionId}`, data)
-				.then(update(state.text))
+				.then(update(state.text.trim()))
 				.then(handleClose)
 				.catch((err) => setState({ error: err }));
 		} else {
 			setState({
+				...state,
 				error:
 					'Your question must end with a "?" and be at least 10 characters long.',
 			});

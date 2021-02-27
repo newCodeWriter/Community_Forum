@@ -30,12 +30,12 @@ const AnswerModal = ({
 	};
 
 	const handleAnswer = () => {
-		const replace = state.text.replace(/(\r\n|\r)/gm, '\n');
+		const response = state.text.trim().replace(/(\r\n|\r)/gm, '\n');
 
 		const data = {
 			user: userId,
 			id: questionId,
-			answer: replace,
+			answer: response,
 		};
 		if (state.text.length >= 5) {
 			axios
@@ -50,7 +50,7 @@ const AnswerModal = ({
 
 	const handleUpdate = () => {
 		const original = answer;
-		const update = state.text;
+		const update = state.text.trim();
 		if (update.length >= 5 && original !== update) {
 			const replace = update.replace(/(\r\n|\r)/gm, '\n');
 			const data = { update: replace };

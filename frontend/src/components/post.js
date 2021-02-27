@@ -6,7 +6,7 @@ import Button from 'react-bootstrap/Button';
 import AnswerModal from './answerModal';
 import QuestionModal from './questionModal';
 import Answer from './answer';
-import { fetchAnswers } from '../actions';
+import { fetchAnswers, fetchCategoryInfo } from '../actions';
 import axios from 'axios';
 import { copyState } from '../localStorage';
 
@@ -37,7 +37,7 @@ class Post extends Component {
 
 	componentDidUpdate(prevProps) {
 		if (this.props.data !== prevProps.data) {
-			this.setState({ answers: this.props.data[0] });
+			this.setState({ answers: this.props.data });
 		}
 	}
 
@@ -68,6 +68,7 @@ class Post extends Component {
 		const question_id = this.props.match.params.questionId;
 		axios
 			.delete(`/delete/question/${question_id}`)
+			.then(this.props.fetchCategoryInfo(this.props.match.params.subjectId))
 			.then(this.props.history.goBack())
 			.catch((err) => console.log(err));
 	};
@@ -84,7 +85,7 @@ class Post extends Component {
 			show_ans,
 			edit_ans,
 		} = this.state;
-		const { match, fetch } = this.props;
+		const { match, fetchAnswers } = this.props;
 		return (
 			<div className='set-width mx-auto'>
 				<div className='row'>
@@ -142,7 +143,7 @@ class Post extends Component {
 						answer={answer}
 						user={username}
 						modal={this.handleAnswerModal}
-						fetch={() => fetch(match.params.questionId)}
+						fetch={() => fetchAnswers(match.params.questionId)}
 					/>
 				))}
 				<AnswerModal
@@ -154,7 +155,7 @@ class Post extends Component {
 					answer={answer}
 					answerId={answer_id}
 					userId={user_id}
-					fetch={() => fetch(match.params.questionId)}
+					fetch={() => fetchAnswers(match.params.questionId)}
 				/>
 				<QuestionModal
 					show={show_que}
@@ -173,8 +174,9 @@ const mapStateToProps = (state) => ({
 	data: state.data_request,
 });
 
-const mapDispatchToProps = (dispatch) => ({
-	fetch: (id) => dispatch(fetchAnswers(id)),
-});
+const mapDispatchToProps = {
+	fetchAnswers,
+	fetchCategoryInfo,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Post);
