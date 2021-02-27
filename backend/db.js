@@ -56,7 +56,7 @@ export const newQuestion = async (que) => {
 		if (subjects.includes(category)) {
 			conn.query(sql, [user, category, question], (err, result) => {
 				if (err) throw err;
-				resolve(1);
+				resolve(result);
 			});
 		}
 	})
@@ -73,7 +73,7 @@ export const newAnswer = async (ans) => {
 	return new Promise((resolve, reject) => {
 		conn.query(sql, [user, id, answer], (err, result) => {
 			if (err) throw err;
-			resolve(1);
+			resolve(result);
 		});
 	})
 		.catch((err) => `error with newAnswer(): ${err}`)
@@ -104,7 +104,7 @@ export const updateQuestion = async (que, data) => {
 	return new Promise((resolve, reject) => {
 		conn.query(sql, [update, que], (err, result) => {
 			if (err) throw err;
-			resolve(1);
+			resolve(result);
 		});
 	})
 		.catch((err) => `error with updateQuestion(): ${err}`)
@@ -120,7 +120,7 @@ export const updateAnswer = async (ans, data) => {
 	return new Promise((resolve, reject) => {
 		conn.query(sql, [update, ans], (err, result) => {
 			if (err) throw err;
-			resolve(1);
+			resolve('answer updated');
 		});
 	})
 		.catch((err) => `error with updateAnswer(): ${err}`)
@@ -135,7 +135,7 @@ export const deleteQuestion = async (que) => {
 	return new Promise((resolve, reject) => {
 		conn.query(sql, [que], (err, result) => {
 			if (err) throw err;
-			resolve(1);
+			resolve(result);
 		});
 	})
 		.catch((err) => `error with deleteQuestion(): ${err}`)
@@ -150,7 +150,7 @@ export const deleteAnswer = async (ans) => {
 	return new Promise((resolve, reject) => {
 		conn.query(sql, [ans], (err, result) => {
 			if (err) throw err;
-			resolve(1);
+			resolve(result);
 		});
 	})
 		.catch((err) => `error with deleteAnswer(): ${err}`)
@@ -260,7 +260,7 @@ export const updateUser = async (name) => {
 	return new Promise((resolve, reject) => {
 		conn.query(sql, [new_name, old_name], (err, result) => {
 			if (err) throw err;
-			resolve(1);
+			resolve(result);
 		});
 	})
 		.catch((err) => `error with updateUser(): ${err}`)
@@ -300,7 +300,7 @@ const setNewPwd = async (user, pwd) => {
 	const update = `UPDATE Users SET password = ? WHERE username = ?`;
 	return new Promise((resolve, reject) => {
 		conn.query(update, [pwd, user], (err, result) => {
-			resolve(1);
+			resolve(result);
 		});
 	})
 		.catch((err) => `error with setNewPwd(): ${err}`)
@@ -315,7 +315,7 @@ export const deleteUser = async (user) => {
 	return new Promise((resolve, reject) => {
 		conn.query(sql, [user], (err, result) => {
 			if (err) throw err;
-			resolve(1);
+			resolve(result);
 		});
 	})
 		.catch((err) => `error with deleteUser(): ${err}`)

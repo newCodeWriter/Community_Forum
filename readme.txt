@@ -1,31 +1,31 @@
 frontend
-
+npm i react react-dom
 npx create-react-app frontend
 cd frontend
 npm start
 set up proxy in package.json
 
-npm install --save axios
-npm install --save react-bootstrap bootstrap
-npm install --save history
-npm install --save jwt-decode
-npm install --save react-router
-npm install --save react-router-dom
-npm install --save react-redux
-npm install --save redux-devtools-extension
-npm install --save redux-logger
-npm install --save redux-thunk
+npm i --save axios
+npm i --save react-bootstrap bootstrap
+npm i --save history
+npm i --save jwt-decode
+npm i --save react-router
+npm i --save react-router-dom
+npm i --save react-redux
+npm i --save redux-devtools-extension
+npm i --save redux-logger
+npm i --save redux-thunk
 
 
 backend
 
 npm init -y
-npm install --save express
-npm install --save mysql
-npm install --save nodemon
-npm install --save bcrypt
-npm install --save body-parser
-npm install --save dotenv
-npm install --save jsonwebtoken
+npm i --save express
+npm i --save mysql
+npm i --save nodemon
+npm i --save bcrypt
+npm i --save body-parser
+npm i --save dotenv
+npm i --save jsonwebtoken
 
 start: nodemon server.js 
