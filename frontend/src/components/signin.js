@@ -41,7 +41,7 @@ class Signin extends Component {
 		this.setState({
 			disable_login: !childData,
 			disable_registration: childData,
-            reg_confirmed: ''
+			reg_confirmed: '',
 		});
 
 	confirmRegistration = (childData) =>
@@ -82,7 +82,7 @@ class Signin extends Component {
 								userError={log_user_error}
 								pwdError={log_pwd_error}
 								clearError={this.handleLoginErrors}
-                                loginUser={this.props.login}
+								loginUser={this.props.loginUser}
 							/>
 						</div>
 					</div>
@@ -99,10 +99,8 @@ const mapStateToProps = (state) => {
 		attempts: loginAttempts,
 	};
 };
-const mapDispatchToProps = (dispatch) => {
-	return {
-		login: (data) => dispatch(loginUser(data))
-	};
+const mapDispatchToProps = {
+	loginUser,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Signin);

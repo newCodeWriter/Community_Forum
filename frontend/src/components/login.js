@@ -64,6 +64,7 @@ const Login = ({
 						minLength='4'
 						required
 						disabled={log_disabled}
+						value={state.log_user}
 					/>
 				</div>
 				{userError ? (
@@ -89,6 +90,7 @@ const Login = ({
 						minLength='8'
 						required
 						disabled={log_disabled}
+						value={state.log_pwd}
 					/>
 				</div>
 				{pwdError ? (
