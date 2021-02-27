@@ -65,7 +65,7 @@ const authentication = (state = userInfo, action) => {
 const data_request = (state = [], action) => {
 	switch (action.type) {
 		case FETCH_DATA:
-			return [...state, action.payload].slice(-1);
+			return [...action.payload];
 		default:
 			return state;
 	}
