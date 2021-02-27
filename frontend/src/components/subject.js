@@ -5,28 +5,30 @@ import Button from 'react-bootstrap/Button';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
 class Subject extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			questions: []
+			questions: [],
 		};
 	}
 
 	componentDidMount() {
 		axios
 			.get(`/category/${this.props.match.params.subjectId}`)
-			.then((res) => this.setState({ questions: res.data }));
+			.then((res) => this.setState({ questions: [...res.data] }));
 	}
 
 	componentDidUpdate(prevProps) {
 		if (this.props.data !== prevProps.data) {
-			this.setState({ questions: this.props.data[0] });
+			this.setState({ questions: this.props.data });
 		}
 	}
 
-    newQuestion = () => this.props.history.push(`${this.props.match.url}/question`) 
+	newQuestion = () =>
+		this.props.history.push(`${this.props.match.url}/question`);
 
 	render() {
 		const { questions } = this.state;
@@ -72,5 +74,13 @@ class Subject extends Component {
 const mapStateToProps = (state) => ({
 	data: state.data_request,
 });
+
+Subject.propTypes = {
+	match: PropTypes.shape({
+		params: PropTypes.shape({
+			subjectId: PropTypes.string,
+		}),
+	}),
+};
 
 export default connect(mapStateToProps)(Subject);
