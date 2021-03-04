@@ -1,4 +1,4 @@
-import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA, UPDATE_USER } from './constants'
+import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA_FOR_POST, UPDATE_USER, FETCH_DATA_FOR_CATEGORY } from './constants'
 import axios from 'axios'
 
 let counter = 1
@@ -45,28 +45,34 @@ export function logout() {
   }
 }
 
-export function fetchData(data) {
+export function fetchCategoryData(data) {
   return{
-    type: FETCH_DATA,
+    type: FETCH_DATA_FOR_CATEGORY,
     payload: data
   }
+}
+export function fetchPostData(data) {
+	return {
+		type: FETCH_DATA_FOR_POST,
+		payload: data,
+	};
 }
 
 export function fetchCategoryInfo(category){
   return async (dispatch) => {
     axios.get(`/category/${category}`)
     .then(res => {
-        dispatch(fetchData(res.data))
+        dispatch(fetchCategoryData(res.data))
       })
       .catch(err => console.log(err));
   };
 }
 
-export function fetchAnswers(id){
+export function fetchPostInfo(id){
   return async (dispatch) => {
     axios.get(`/post/${id}`)
     .then(res => {
-        dispatch(fetchData(res.data))
+        dispatch(fetchPostData(res.data))
     })
     .catch(err => console.log(err));
   };

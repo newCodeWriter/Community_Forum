@@ -4,7 +4,8 @@ import {
 	LOGIN_USER_SUCCESS,
 	LOGIN_USER_FAILURE,
 	LOGOUT_USER,
-	FETCH_DATA,
+	FETCH_DATA_FOR_CATEGORY,
+	FETCH_DATA_FOR_POST,
 	UPDATE_USER,
 } from '../constants';
 import { combineReducers } from 'redux';
@@ -62,15 +63,28 @@ const authentication = (state = userInfo, action) => {
 	}
 };
 
-const data_request = (state = [], action) => {
+const category_data_request = (state = [], action) => {
 	switch (action.type) {
-		case FETCH_DATA:
+		case FETCH_DATA_FOR_CATEGORY:
 			return [...action.payload];
 		default:
 			return state;
 	}
 };
 
-const mathApp = combineReducers({ authentication, data_request });
+const post_data_request = (state = {}, action) => {
+	switch (action.type) {
+		case FETCH_DATA_FOR_POST:
+			return { ...action.payload };
+		default:
+			return state;
+	}
+};
+
+const mathApp = combineReducers({
+	authentication,
+	category_data_request,
+	post_data_request,
+});
 
 export default mathApp;
