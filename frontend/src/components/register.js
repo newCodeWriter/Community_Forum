@@ -176,6 +176,7 @@ const Register = ({ confirm, isDisabled, disableForm }) => {
 							id='terms'
 							className='form-check-input reg'
 							disabled={reg_disabled}
+							checked={isDisabled ? false : null}
 							required
 						/>
 						I agree to the Terms and Conditions and Privacy Policy
