@@ -2,12 +2,13 @@
 
 import React from 'react';
 import axios from 'axios';
+import { copyState } from '../localStorage';
 
-const Answer = ({ answer, user, modal, fetch }) => {
+const Answer = ({ answer, modal, category, del }) => {
+	const { userName } = copyState().authentication;
+
 	const handleEdit = () => {
 		modal({
-			show: true,
-			edit: true,
 			answer: answer.response,
 			answerId: answer.response_id,
 		});
@@ -15,41 +16,35 @@ const Answer = ({ answer, user, modal, fetch }) => {
 
 	const handleDelete = () => {
 		axios
-			.delete(`/delete/answer/${answer.response_id}`)
-			.then(fetch)
+			.delete(`/delete/answer/${category}/${answer.response_id}`)
+			.then(del())
 			.catch((err) => console.log(err));
 	};
 
 	return (
 		<>
-			{user !== `${answer.answer_user}` ? (
+			{userName !== answer.answer_user ? (
 				<div className='row text-muted tryit'>
-					<div className='col mt-2 tryit' value={answer.response}>
-						{answer.response}
-					</div>
+					<div className='col mt-2 tryit'>{answer.response}</div>
 				</div>
 			) : (
 				<>
 					<div className='row'>
 						<div className='col'>
 							<i
-								id={answer.response_id}
+								id={`edit_${answer.response_id}`}
 								className='fas fa-edit mt-2 small mr-2'
 								onClick={handleEdit}
 							></i>
 							<i
-								className={`fas fa-trash-alt ${answer.response_id}`}
+								id={`delete_${answer.response_id}`}
+								className={'fas fa-trash-alt'}
 								onClick={handleDelete}
 							></i>
 						</div>
 					</div>
 					<div className='row text-muted tryit'>
-						<div
-							value={answer.response}
-							className='col mt-2 tryit'
-						>
-							{answer.response}
-						</div>
+						<div className='col mt-2 tryit'>{answer.response}</div>
 					</div>
 				</>
 			)}
