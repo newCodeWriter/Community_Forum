@@ -26,7 +26,7 @@ const Login = ({
 	const handleLogin = (event) => {
 		event.preventDefault();
 		const data = {
-			username: state.log_user,
+			username: state.log_user.toLowerCase(),
 			password: state.log_pwd,
 		};
 		loginUser(data);
