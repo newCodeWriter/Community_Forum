@@ -23,7 +23,7 @@ class Subject extends Component {
 
 	componentDidUpdate(prevProps) {
 		if (this.props.data !== prevProps.data) {
-			this.setState({ questions: this.props.data });
+			this.setState({ questions: [...this.props.data] });
 		}
 	}
 
@@ -53,16 +53,16 @@ class Subject extends Component {
 							className='border border-light bg-light d-block mb-3 p-3 subject-container shadow'
 						>
 							<div className='row'>
-								<div className='col-md-5 text-muted small'>{q.date}</div>
+								<div className='col-md-5 text-muted small'>{q.question_date}</div>
 								<div className='col-md-7 text-success text-right small q-user'>
-									by: {q.username}
+									by: {q.submit_user}
 								</div>
 							</div>
 							<div className='row mt-3 w-100'>
-								<div className='col'>{q.new_question}</div>
+								<div className='col'>{q.question}</div>
 							</div>
 							<div className='row mt-2 text-muted'>
-								<div className='col text-right small'>Answers: {q.answers}</div>
+								<div className='col text-right small'>Answers: {q.responses.length}</div>
 							</div>
 						</div>
 					</Link>
@@ -72,7 +72,7 @@ class Subject extends Component {
 	}
 }
 const mapStateToProps = (state) => ({
-	data: state.data_request,
+	data: state.category_data_request,
 });
 
 Subject.propTypes = {
