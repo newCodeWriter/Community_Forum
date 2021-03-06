@@ -22,9 +22,9 @@ backend
 npm init -y
 npm i --save express
 npm i --save mysql
+npm i --save mongodb
 npm i --save nodemon
 npm i --save bcrypt
-npm i --save body-parser
 npm i --save dotenv
 npm i --save jsonwebtoken
 
