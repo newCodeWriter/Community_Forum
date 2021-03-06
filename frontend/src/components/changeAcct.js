@@ -6,7 +6,7 @@ import { changeUser } from '../actions';
 import ChangeUser from './changeUser';
 import ChangePwd from './changePwd';
 
-function ChangeAcct({ dispatch }) {
+const ChangeAcct = ({ dispatch }) => {
 	const handleUserChange = (child) => {
 		dispatch(changeUser(child.oldUser, child.newUser));
 	};

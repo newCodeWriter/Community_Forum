@@ -23,10 +23,11 @@ const ChangeUser = ({ submit }) => {
 		const user_patt = new RegExp(
 			'^(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}$'
 		);
-		const user_test = user_patt.test(state.new_user);
-		if (user_test && state.new_user.toLowerCase() !== userName) {
+		const newName = state.new_user.toLowerCase();
+		const user_test = user_patt.test(newName);
+		if (user_test && newName !== userName) {
 			axios
-				.get(`/check/${state.new_user.toLowerCase()}`)
+				.get(`/check/${newName}`)
 				.then((res) => {
 					res.data === 'ok'
 						? setState({
@@ -40,7 +41,7 @@ const ChangeUser = ({ submit }) => {
 						  });
 				})
 				.catch((err) => console.log(err));
-		} else if (state.new_user.toLowerCase() === userName) {
+		} else if (newName === userName) {
 			setState({
 				...state,
 				user_error: 'The name you entered matches your current username.',
