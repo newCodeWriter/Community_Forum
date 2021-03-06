@@ -62,7 +62,7 @@ const Home = ({ match, dispatch }) => {
 				</Nav>
 			</Navbar>
 			<div id='main' className='row w-100 m-0'>
-				<div className='col-sm-5 col-md-4 col-lg-3 pl-0 pr-0'>
+				<div id='side-menu' className='col-sm-5 col-md-4 col-lg-3 pl-0 pr-0 mr-3'>
 					<Nav className='flex-column flex-c'>
 						{math.map(({ name, id }) => (
 							<NavLink
@@ -77,7 +77,7 @@ const Home = ({ match, dispatch }) => {
 						))}
 					</Nav>
 				</div>
-				<div className='col-sm-7 col-md-8 col-lg-9 pl-5 pt-5'>
+				<div id='content' className='col-sm-7 col-md-8 col-lg-9 pl-5 pt-5'>
 					<Switch>
 						<Route
 							exact
