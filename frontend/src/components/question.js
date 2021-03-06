@@ -20,7 +20,7 @@ class Question extends Component {
 		event.preventDefault();
 		const text = this.state.question;
 		const data = {
-			user: copyState().authentication.userId,
+			user: copyState().authentication.userName,
 			category: this.props.match.params.subjectId,
 			question: text,
 		};
