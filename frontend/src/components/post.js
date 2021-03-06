@@ -113,7 +113,7 @@ class Post extends Component {
 							Submitted by:{' '}
 							<span className='text-primary'>{question.user}</span>
 							{`, ${question.date}`}
-							{userName === question.user ? (
+							{userName === question.user && (
 								<>
 									<i
 										className='fas fa-edit mt-2 small ml-2 mr-2 open_question'
@@ -124,8 +124,6 @@ class Post extends Component {
 										onClick={this.deleteQuestion}
 									></i>
 								</>
-							) : (
-								<></>
 							)}
 						</div>
 					</div>
