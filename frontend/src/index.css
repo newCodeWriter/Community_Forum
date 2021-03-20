@@ -10,7 +10,7 @@ body, #root{
 	max-height: 100vh;
 }
 .bg-image {
-	background-image: url('../src/images/mathbg.jpg');
+	background-image: url('../src/assets/mathbg.jpg');
 	height: 100vh;
 	background-repeat: no-repeat;
 	background-size: cover;

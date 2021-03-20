@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
 import { connect } from 'react-redux';
-import { copyState } from '../localStorage';
-import { fetchCategoryInfo } from '../actions';
+import { copyState } from '../utils/localStorage';
+import { fetchCategoryInfo } from '../actions/actions';
 
 class Question extends Component {
 	constructor(props) {

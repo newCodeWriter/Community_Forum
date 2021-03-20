@@ -7,7 +7,7 @@ import {
 	FETCH_DATA_FOR_CATEGORY,
 	FETCH_DATA_FOR_POST,
 	UPDATE_USER,
-} from '../constants';
+} from '../constants/constants';
 import { combineReducers } from 'redux';
 import decode from 'jwt-decode';
 
@@ -63,7 +63,7 @@ const authentication = (state = userInfo, action) => {
 	}
 };
 
-const category_data_request = (state = [], action) => {
+const categoryDataRequest = (state = [], action) => {
 	switch (action.type) {
 		case FETCH_DATA_FOR_CATEGORY:
 			return [...action.payload];
@@ -72,7 +72,7 @@ const category_data_request = (state = [], action) => {
 	}
 };
 
-const post_data_request = (state = {}, action) => {
+const postDataRequest = (state = {}, action) => {
 	switch (action.type) {
 		case FETCH_DATA_FOR_POST:
 			return { ...action.payload };
@@ -83,8 +83,8 @@ const post_data_request = (state = {}, action) => {
 
 const mathApp = combineReducers({
 	authentication,
-	category_data_request,
-	post_data_request,
+	categoryDataRequest,
+	postDataRequest,
 });
 
 export default mathApp;

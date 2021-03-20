@@ -1,11 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
-import Home from './components/home'
-import Signin from './components/signin'
+import Home from './pages/home'
+import Signin from './pages/signin'
 import Error from './components/error'
-import PrivateRoute from './containers/private'
-import PublicRoute from './containers/public'
+import PrivateRoute from './routes/private'
+import PublicRoute from './routes/public'
 
 const App = () => {
 

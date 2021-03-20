@@ -1,13 +1,13 @@
 /** @format */
 
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import Button from 'react-bootstrap/Button';
-import PostModal from './postModal';
-import Answer from './answer';
-import { fetchPostInfo } from '../actions';
-import axios from 'axios';
-import { copyState } from '../localStorage';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import Button from "react-bootstrap/Button";
+import PostModal from "../components/postModal";
+import Answer from "../components/answer";
+import { fetchPostInfo } from "../actions/actions";
+import axios from "axios";
+import { copyState } from "../utils/localStorage";
 
 class Post extends Component {
 	constructor(props) {
@@ -17,7 +17,7 @@ class Post extends Component {
 			edit: { ans: false, que: false },
 			question: {},
 			answers: [],
-			answer: { id: '', original: '' },
+			answer: { id: "", original: "" },
 		};
 	}
 
@@ -50,12 +50,12 @@ class Post extends Component {
 		if (this.props.data !== prevProps.data) {
 			const { question, question_date, responses } = this.props.data;
 			this.setState({
+				answers: responses,
 				question: {
 					...this.state.question,
 					question: question,
 					date: question_date,
 				},
-				answers: responses,
 			});
 		}
 	}
@@ -105,22 +105,22 @@ class Post extends Component {
 		const { question, answers, answer, edit, show } = this.state;
 		const { userName } = copyState().authentication;
 		return (
-			<div className='set-width mx-auto'>
-				<div className='row'>
-					<div className='col-12 col-lg-10'>
+			<div className="set-width mx-auto">
+				<div className="row">
+					<div className="col-12 col-lg-10">
 						<h4>{question.question}</h4>
-						<div className='mq-font small font-weight-bold'>
-							Submitted by:{' '}
-							<span className='text-primary'>{question.user}</span>
+						<div className="mq-font small font-weight-bold">
+							Submitted by:{" "}
+							<span className="text-primary">{question.user}</span>
 							{`, ${question.date}`}
 							{userName === question.user && (
 								<>
 									<i
-										className='fas fa-edit mt-2 small ml-2 mr-2 open_question'
+										className="fas fa-edit mt-2 small ml-2 mr-2 open_question"
 										onClick={this.showQuestion}
 									></i>
 									<i
-										className='fas fa-trash-alt delete_question'
+										className="fas fa-trash-alt delete_question"
 										onClick={this.deleteQuestion}
 									></i>
 								</>
@@ -128,22 +128,22 @@ class Post extends Component {
 						</div>
 					</div>
 					<div
-						id='answer-btn'
-						className='col-12 col-lg-2 mt-3 mt-lg-0 text-primary text-right'
+						id="answer-btn"
+						className="col-12 col-lg-2 mt-3 mt-lg-0 text-primary text-right"
 					>
 						<Button
-							variant='success'
+							variant="success"
 							onClick={this.showAnswer}
-							type='button'
-							className='p-2'
-							title='Have an answer?'
+							type="button"
+							className="p-2"
+							title="Have an answer?"
 						>
 							Answer
 						</Button>
 					</div>
 				</div>
-				<div className='row mt-4 w-100'>
-					{answers.length ? <div className='col mb-2'>Answers:</div> : <></>}
+				<div className="row mt-4 w-100">
+					{answers.length ? <div className="col mb-2">Answers:</div> : null}
 				</div>
 				{answers.map((answer) => (
 					<Answer
@@ -168,7 +168,7 @@ class Post extends Component {
 }
 
 const mapStateToProps = (state) => ({
-	data: state.post_data_request,
+	data: state.postDataRequest,
 });
 
 const mapDispatchToProps = (dispatch) => {

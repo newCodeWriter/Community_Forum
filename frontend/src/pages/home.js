@@ -4,14 +4,14 @@ import React from 'react';
 import { Button, Navbar, Nav, Dropdown, NavItem } from "react-bootstrap";
 import { Route, Switch, NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { fetchCategoryInfo, logout } from '../actions';
-import { copyState } from '../localStorage';
+import { fetchCategoryInfo, logout } from '../actions/actions';
+import { copyState } from '../utils/localStorage';
 import Subject from './subject';
 import Question from './question';
 import Post from './post';
-import ChangeAcct from './changeAcct';
-import DeleteAccount from './deleteAcct';
-import { math } from '../constants';
+import Account from './account';
+import DeleteAccount from '../components/deleteAcct';
+import { math } from '../constants/constants';
 import axios from 'axios';
 
 const Home = ({ match, dispatch }) => {
@@ -96,7 +96,7 @@ const Home = ({ match, dispatch }) => {
 						<Route
 							exact
 							path={`${match.path}/account`}
-							component={ChangeAcct}
+							component={Account}
 						/>
 						<Route path={`${match.path}/:subjectId`} component={Subject} />
 					</Switch>

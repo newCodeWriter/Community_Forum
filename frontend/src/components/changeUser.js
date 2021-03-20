@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button, InputGroup, FormControl, Form } from "react-bootstrap";
 import axios from "axios";
-import { copyState } from "../localStorage";
+import { copyState } from "../utils/localStorage";
 
 const ChangeUser = ({ submit }) => {
 	const [newUser, setNewUser] = useState("");

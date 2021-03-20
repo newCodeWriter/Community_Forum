@@ -1,4 +1,4 @@
-import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA_FOR_POST, UPDATE_USER, FETCH_DATA_FOR_CATEGORY } from './constants'
+import { LOGIN_USER_FAILURE, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_DATA_FOR_POST, UPDATE_USER, FETCH_DATA_FOR_CATEGORY } from '../constants/constants'
 import axios from 'axios'
 
 let counter = 1
@@ -78,14 +78,14 @@ export function fetchPostInfo(id){
   };
 }
 
-export function changeUser(old_name, new_name){
+export function changeUser(oldName, newName){
   return async (dispatch) => {
     let data = {
-      old_name: old_name, 
-      new_name: new_name
+      oldName: oldName, 
+      newName: newName
     }
     axios.put(`/update/user`, data)
-    .then(dispatch(updateUser(new_name)))
+    .then(dispatch(updateUser(newName)))
     .catch(err => console.log(err));
   };
 }

@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { changeUser } from '../actions';
-import ChangeUser from './changeUser';
-import ChangePwd from './changePwd';
+import { changeUser } from '../actions/actions';
+import ChangeUser from '../components/changeUser';
+import ChangePwd from '../components/changePwd';
 
-const ChangeAcct = ({ dispatch }) => {
+const Account = ({ dispatch }) => {
 	const handleUserChange = (child) => {
 		dispatch(changeUser(child.oldUser, child.newUser));
 	};
@@ -20,4 +20,4 @@ const ChangeAcct = ({ dispatch }) => {
 		</div>
 	);
 }
-export default connect()(ChangeAcct);
+export default connect()(Account);

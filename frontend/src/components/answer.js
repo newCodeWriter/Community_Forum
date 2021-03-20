@@ -2,7 +2,7 @@
 
 import React from 'react';
 import axios from 'axios';
-import { copyState } from '../localStorage';
+import { copyState } from '../utils/localStorage';
 
 const Answer = ({ answer, modal, category, del }) => {
 	const { userName } = copyState().authentication;

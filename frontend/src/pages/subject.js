@@ -76,7 +76,7 @@ class Subject extends Component {
 	}
 }
 const mapStateToProps = (state) => ({
-	data: state.category_data_request,
+	data: state.categoryDataRequest,
 });
 
 Subject.propTypes = {

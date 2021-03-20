@@ -1,54 +1,53 @@
 /** @format */
 
-import mongodb from 'mongodb';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import pkg from 'mongodb';
+import mongodb from "mongodb";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import pkg from "mongodb";
 dotenv.config();
 
 const { ObjectId } = pkg;
 const { MongoClient } = mongodb;
 
 const setConnection = async () => {
-	const url = 'mongodb://localhost:27017';
+	const url = "mongodb://localhost:27017";
 	const client = new MongoClient(url, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
 	});
 	await client
 		.connect()
-		.then(console.log('Connected to Mongo drive.'))
+		.then(console.log("Connected to Mongo drive."))
 		.catch((err) => console.log(`Error with Mongo drive: ${err}`));
 	return client;
 };
 
 const subjects = [
-	'algebra',
-	'arithmetic',
-	'calculus',
-	'differential',
-	'discrete',
-	'geometry',
-	'logic',
-	'number',
-	'statistics',
-	'trigonometry',
+	"algebra",
+	"arithmetic",
+	"calculus",
+	"differential",
+	"discrete",
+	"geometry",
+	"logic",
+	"number",
+	"statistics",
+	"trigonometry",
 ];
 
 export const getRegistration = async (reg) => {
 	const { user, password } = reg;
 	const hashPwd = await bcrypt.hash(password, 10);
-	const new_user = user.toLowerCase();
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('users');
+	const coll = client.db("nodejs").collection("users");
 	const cursor = coll
-		.find({ username: new_user })
+		.find({ username: user })
 		.project({ _id: 0, username: 1 });
 	const result = await cursor.count();
 	return new Promise((resolve, reject) => {
 		if (result > 0) resolve(409);
-		else resolve(registerUser(new_user, hashPwd));
+		else resolve(registerUser(user, hashPwd));
 	})
 		.catch((err) => `error with getRegistration(): ${err}`)
 		.finally(() => {
@@ -58,7 +57,7 @@ export const getRegistration = async (reg) => {
 
 const registerUser = async (user, pwd) => {
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('users');
+	const coll = client.db("nodejs").collection("users");
 	const doc = { username: user, password: pwd };
 	const result = await coll.insertOne(doc);
 	return new Promise((resolve, reject) => {
@@ -71,7 +70,7 @@ const registerUser = async (user, pwd) => {
 export const getLogin = async (log) => {
 	const { username, password } = log;
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('users');
+	const coll = client.db("nodejs").collection("users");
 	const cursor = coll.find({ username: username });
 	const arr = await cursor.toArray();
 	return new Promise((resolve, reject) => {
@@ -89,7 +88,7 @@ export const getLogin = async (log) => {
 					const accessToken = jwt.sign(
 						user_info,
 						process.env.ACCESS_TOKEN_SECRET,
-						{ expiresIn: 1500 }
+						{ expiresIn: 2000 }
 					);
 					resolve(accessToken);
 				} else resolve(404);
@@ -104,7 +103,7 @@ export const getLogin = async (log) => {
 
 export const categoryInfo = async (category) => {
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
+	const coll = client.db("nodejs").collection("questions");
 	const result = subjects.includes(category)
 		? coll.findOne({ category: category })
 		: null;
@@ -120,7 +119,7 @@ export const categoryInfo = async (category) => {
 export const newQuestion = async (que) => {
 	const { user, category, question } = que;
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
+	const coll = client.db("nodejs").collection("questions");
 	const filter = { category: category };
 	const date = new Date();
 	const doc = {
@@ -149,12 +148,12 @@ export const newQuestion = async (que) => {
 export const newAnswer = async (ans) => {
 	const { user, id, answer } = ans;
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
-	const filter = { 'questions.question_id': ObjectId(id) };
+	const coll = client.db("nodejs").collection("questions");
+	const filter = { "questions.question_id": ObjectId(id) };
 	const date = new Date();
 	const doc = {
 		$push: {
-			'questions.$.responses': {
+			"questions.$.responses": {
 				response_id: ObjectId(),
 				response: answer,
 				answer_user: user,
@@ -174,12 +173,11 @@ export const newAnswer = async (ans) => {
 
 export const getPost = async (que) => {
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
-	const filter = { 'questions.question_id': ObjectId(que) };
+	const coll = client.db("nodejs").collection("questions");
 	const cursor = coll.aggregate([
-		{ $unwind: '$questions' },
+		{ $unwind: "$questions" },
 		{
-			$match: filter,
+			$match: { "questions.question_id": ObjectId(que) },
 		},
 		{ $project: { _id: 0, questions: 1 } },
 	]);
@@ -196,16 +194,16 @@ export const getPost = async (que) => {
 export const updateQuestion = async (que, data) => {
 	const { update, category } = data;
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
+	const coll = client.db("nodejs").collection("questions");
 	const date = new Date();
 	const filter = {
 		category: category,
-		'questions.question_id': ObjectId(que),
+		"questions.question_id": ObjectId(que),
 	};
 	const result = await coll.updateOne(filter, {
 		$set: {
-			'questions.$.question': update,
-			'questions.$.question_date': `${date.toDateString()} at ${date.toLocaleTimeString()}`,
+			"questions.$.question": update,
+			"questions.$.question_date": `${date.toDateString()} at ${date.toLocaleTimeString()}`,
 		},
 	});
 	return new Promise((resolve, reject) => {
@@ -220,17 +218,17 @@ export const updateQuestion = async (que, data) => {
 export const updateAnswer = async (ans, data) => {
 	const { update, category } = data;
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
+	const coll = client.db("nodejs").collection("questions");
 	const date = new Date();
 	const result = await coll.updateOne(
 		{ category: category },
 		{
 			$set: {
-				'questions.$[].responses.$[r].response': update,
-				'questions.$[].responses.$[r].response_date': `${date.toDateString()} at ${date.toLocaleTimeString()}`,
+				"questions.$[].responses.$[r].response": update,
+				"questions.$[].responses.$[r].response_date": `${date.toDateString()} at ${date.toLocaleTimeString()}`,
 			},
 		},
-		{ arrayFilters: [{ 'r.response_id': ObjectId(ans) }] }
+		{ arrayFilters: [{ "r.response_id": ObjectId(ans) }] }
 	);
 	return new Promise((resolve, reject) => {
 		resolve(result);
@@ -243,7 +241,7 @@ export const updateAnswer = async (ans, data) => {
 
 export const deleteQuestion = async (category, id) => {
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
+	const coll = client.db("nodejs").collection("questions");
 	const result = await coll.updateOne(
 		{ category: category },
 		{ $pull: { questions: { question_id: ObjectId(id) } } }
@@ -259,12 +257,12 @@ export const deleteQuestion = async (category, id) => {
 
 export const deleteAnswer = async (category, id) => {
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('questions');
+	const coll = client.db("nodejs").collection("questions");
 	const result = await coll.updateOne(
 		{ category: category },
 		{
 			$pull: {
-				'questions.$[].responses': {
+				"questions.$[].responses": {
 					response_id: ObjectId(id),
 				},
 			},
@@ -281,12 +279,12 @@ export const deleteAnswer = async (category, id) => {
 
 export const checkName = async (name) => {
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('users');
+	const coll = client.db("nodejs").collection("users");
 	const cursor = coll.find({ username: name });
 	const result = await cursor.count();
 	return new Promise((resolve, reject) => {
-		if (result > 0) resolve('not available');
-		else resolve('ok');
+		if (result > 0) resolve("not available");
+		else resolve("ok");
 	})
 		.catch((err) => `error with checkName(): ${err}`)
 		.finally(() => {
@@ -295,25 +293,25 @@ export const checkName = async (name) => {
 };
 
 export const updateUser = async (name) => {
-	const { new_name, old_name } = name;
+	const { newName, oldName } = name;
 	const client = await setConnection();
-	const userColl = client.db('nodejs').collection('users');
-	const questionColl = client.db('nodejs').collection('questions');
+	const userColl = client.db("nodejs").collection("users");
+	const questionColl = client.db("nodejs").collection("questions");
 	const updateUsername = await userColl.updateOne(
-		{ username: old_name },
-		{ $set: { username: new_name } }
+		{ username: oldName },
+		{ $set: { username: newName } }
 	);
 	// update questions submitted by user
 	const updateQuestions = await questionColl.updateMany(
 		{},
-		{ $set: { 'questions.$[q].submit_user': new_name } },
-		{ arrayFilters: [{ 'q.submit_user': old_name }] }
+		{ $set: { "questions.$[q].submit_user": newName } },
+		{ arrayFilters: [{ "q.submit_user": oldName }] }
 	);
 	// update answers submitted by user
 	const updateAnswers = await questionColl.updateMany(
 		{},
-		{ $set: { 'questions.$[].responses.$[r].answer_user': new_name } },
-		{ arrayFilters: [{ 'r.answer_user': old_name }] }
+		{ $set: { "questions.$[].responses.$[r].answer_user": newName } },
+		{ arrayFilters: [{ "r.answer_user": oldName }] }
 	);
 	Promise.all([updateUsername, updateQuestions, updateAnswers])
 		.catch((err) => `error with updateUser(): ${err}`)
@@ -323,19 +321,19 @@ export const updateUser = async (name) => {
 };
 
 export const updatePwd = async (pwd) => {
-	const { old_pwd, new_pwd, user } = pwd;
-	const new_hashPwd = await bcrypt.hash(new_pwd, 10);
+	const { oldPwd, newPwd, user } = pwd;
+	const newHashPwd = await bcrypt.hash(newPwd, 10);
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('users');
+	const coll = client.db("nodejs").collection("users");
 	const cursor = coll.find({ username: user }).project({ _id: 0, password: 1 });
 	const result = await cursor.next();
 	return new Promise((resolve, reject) => {
-		const db_pwd = result.password;
-		bcrypt.compare(old_pwd, db_pwd, (error, result) => {
+		const dbPwd = result.password;
+		bcrypt.compare(oldPwd, dbPwd, (error, result) => {
 			if (error) throw error;
 			else {
-				if (!result) resolve('wrong password');
-				else resolve(setNewPwd(user, new_hashPwd));
+				if (!result) resolve("wrong password");
+				else resolve(setNewPwd(user, newHashPwd));
 			}
 		});
 	})
@@ -347,7 +345,7 @@ export const updatePwd = async (pwd) => {
 
 const setNewPwd = async (user, pwd) => {
 	const client = await setConnection();
-	const coll = client.db('nodejs').collection('users');
+	const coll = client.db("nodejs").collection("users");
 	const result = coll.updateOne(
 		{ username: user },
 		{ $set: { password: pwd } }
@@ -363,9 +361,9 @@ const setNewPwd = async (user, pwd) => {
 
 export const deleteUser = async (user) => {
 	const client = await setConnection();
-	const userColl = client.db('nodejs').collection('users');
-	const questionColl = client.db('nodejs').collection('questions');
-
+	const userColl = client.db("nodejs").collection("users");
+	const questionColl = client.db("nodejs").collection("questions");
+	//  delete user
 	const deleteUsername = await userColl.deleteOne({ username: user });
 	// delete questions submitted by user
 	const deleteQuestions = await questionColl.updateMany(
@@ -377,7 +375,7 @@ export const deleteUser = async (user) => {
 		{},
 		{
 			$pull: {
-				'questions.$[].responses': {
+				"questions.$[].responses": {
 					answer_user: user,
 				},
 			},
