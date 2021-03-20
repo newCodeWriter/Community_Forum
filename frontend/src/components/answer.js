@@ -48,7 +48,7 @@ const Answer = ({ answer, modal, category, del }) => {
 					</div>
 				</>
 			)}
-			{answer.answer_user ? (
+			{answer.answer_user && (
 				<>
 					<div className='row'>
 						<div className='font-weight-bold text-right small col'>
@@ -58,8 +58,6 @@ const Answer = ({ answer, modal, category, del }) => {
 					</div>
 					<hr />
 				</>
-			) : (
-				<></>
 			)}
 		</>
 	);

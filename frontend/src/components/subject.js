@@ -1,11 +1,11 @@
 /** @format */
 
-import React, { Component } from 'react';
-import Button from 'react-bootstrap/Button';
-import { Link } from 'react-router-dom';
-import { connect } from 'react-redux';
-import axios from 'axios';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import Button from "react-bootstrap/Button";
+import { Link } from "react-router-dom";
+import { connect } from "react-redux";
+import axios from "axios";
+import PropTypes from "prop-types";
 
 class Subject extends Component {
 	constructor(props) {
@@ -35,10 +35,10 @@ class Subject extends Component {
 		const { url } = this.props.match;
 
 		return (
-			<div className='set-width mx-auto'>
+			<div className="set-width mx-auto">
 				<Button
-					variant='primary'
-					className='mb-4 pl-3 pr-3 pt-2 pb-2'
+					variant="primary"
+					className="mb-4 pl-3 pr-3 pt-2 pb-2"
 					onClick={this.newQuestion}
 				>
 					New Question?
@@ -50,19 +50,23 @@ class Subject extends Component {
 					>
 						<div
 							id={q.question_id}
-							className='border border-light bg-light d-block mb-3 p-3 subject-container shadow'
+							className="border border-light bg-light d-block mb-3 p-3 subject-container shadow"
 						>
-							<div className='row'>
-								<div className='col-md-5 text-muted small'>{q.question_date}</div>
-								<div className='col-md-7 text-success text-right small q-user'>
+							<div className="row">
+								<div className="col-md-5 text-muted small">
+									{q.question_date}
+								</div>
+								<div className="col-md-7 text-success text-right small q-user">
 									by: {q.submit_user}
 								</div>
 							</div>
-							<div className='row mt-3 w-100'>
-								<div className='col'>{q.question}</div>
+							<div className="row mt-3 w-100">
+								<div className="col">{q.question}</div>
 							</div>
-							<div className='row mt-2 text-muted'>
-								<div className='col text-right small'>Answers: {q.responses.length}</div>
+							<div className="row mt-2 text-muted">
+								<div className="col text-right small">
+									Answers: {q.responses.length}
+								</div>
 							</div>
 						</div>
 					</Link>

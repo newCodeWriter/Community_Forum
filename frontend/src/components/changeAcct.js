@@ -12,10 +12,10 @@ const ChangeAcct = ({ dispatch }) => {
 	};
 
 	return (
-		<div id='acct-chg'>
-			<h4 className='mb-2'>Change Username: </h4>
+		<div id='acct-chg' >
+			<h4 className='mb-3'>Change Username: </h4>
 			<ChangeUser submit={handleUserChange} />
-			<h4 className='mt-2 mb-2'>Change Password:</h4>
+			<h4 className='mt-2 mb-3'>Change Password:</h4>
 			<ChangePwd />
 		</div>
 	);

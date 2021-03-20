@@ -1,11 +1,7 @@
 /** @format */
 
 import React from 'react';
-import Button from 'react-bootstrap/Button';
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
-import Dropdown from 'react-bootstrap/Dropdown';
-import NavItem from 'react-bootstrap/NavItem';
+import { Button, Navbar, Nav, Dropdown, NavItem } from "react-bootstrap";
 import { Route, Switch, NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { fetchCategoryInfo, logout } from '../actions';
@@ -61,15 +57,15 @@ const Home = ({ match, dispatch }) => {
 					</Button>
 				</Nav>
 			</Navbar>
-			<div id='main' className='row w-100 m-0'>
-				<div id='side-menu' className='col-sm-5 col-md-4 col-lg-3 pl-0 pr-0 mr-3'>
+			<div id='main' className='row m-0'>
+				<div id='side-menu' className='col-sm-5 col-md-4 col-lg-3 pl-0'>
 					<Nav className='flex-column flex-c'>
 						{math.map(({ name, id }) => (
 							<NavLink
 								key={id}
 								to={`${match.url}/${id}`}
 								activeClassName='active-link'
-								className='pt-4 pb-4 pl-4 pr-3 border-bottom category-link'
+								className='pt-4 pb-4 pl-4 border-bottom'
 								onClick={() => dispatch(fetchCategoryInfo(id))}
 							>
 								{name}
