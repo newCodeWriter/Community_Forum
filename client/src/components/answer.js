@@ -1,11 +1,11 @@
 /** @format */
 
-import React from 'react';
-import axios from 'axios';
-import { copyState } from '../utils/localStorage';
+import React from "react";
+import { useStateContext } from "../context/context";
+import axios from "axios";
 
 const Answer = ({ answer, modal, category, del }) => {
-	const { userName } = copyState().authentication;
+	const { user } = useStateContext();
 
 	const handleEdit = () => {
 		modal({
@@ -23,37 +23,37 @@ const Answer = ({ answer, modal, category, del }) => {
 
 	return (
 		<>
-			{userName !== answer.answer_user ? (
-				<div className='row text-muted tryit'>
-					<div className='col mt-2 tryit'>{answer.response}</div>
+			{user.name !== answer.answer_user ? (
+				<div className="row text-muted tryit">
+					<div className="col mt-2 tryit">{answer.response}</div>
 				</div>
 			) : (
 				<>
-					<div className='row'>
-						<div className='col'>
+					<div className="row">
+						<div className="col">
 							<i
 								id={`edit_${answer.response_id}`}
-								className='fas fa-edit mt-2 small mr-2'
+								className="fas fa-edit mt-2 small mr-2"
 								onClick={handleEdit}
 							></i>
 							<i
 								id={`delete_${answer.response_id}`}
-								className={'fas fa-trash-alt'}
+								className={"fas fa-trash-alt"}
 								onClick={handleDelete}
 							></i>
 						</div>
 					</div>
-					<div className='row text-muted tryit'>
-						<div className='col mt-2 tryit'>{answer.response}</div>
+					<div className="row text-muted tryit">
+						<div className="col mt-2 tryit">{answer.response}</div>
 					</div>
 				</>
 			)}
 			{answer.answer_user && (
 				<>
-					<div className='row'>
-						<div className='font-weight-bold text-right small col'>
-							answered {answer.response_date} by{' '}
-							<span className='text-success'>{answer.answer_user}</span>
+					<div className="row">
+						<div className="font-weight-bold text-right small col">
+							answered {answer.response_date} by{" "}
+							<span className="text-success">{answer.answer_user}</span>
 						</div>
 					</div>
 					<hr />

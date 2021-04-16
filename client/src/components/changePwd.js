@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import axios from "axios";
-import { copyState } from "../utils/localStorage";
+import { useStateContext } from "../context/context";
 
 const ChangePwd = () => {
 	const [oldPwd, setOldPwd] = useState("");
@@ -12,7 +12,7 @@ const ChangePwd = () => {
 	const [pwdError, setPwdError] = useState("");
 	const [pwdTestError, setPwdTestError] = useState(false);
 
-	const { userName } = copyState().authentication;
+	const { user } = useStateContext();
 
 	const handleOldPwd = (event) => {
 		setOldPwd(event.target.value);
@@ -46,7 +46,7 @@ const ChangePwd = () => {
 			newPassword === confirmPassword
 		) {
 			const updatePwd = {
-				user: userName,
+				user: user.name,
 				oldPwd: oldPassword,
 				newPwd: newPassword,
 			};

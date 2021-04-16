@@ -1,13 +1,10 @@
 /** @format */
 
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import Button from "react-bootstrap/Button";
 import PostModal from "../components/postModal";
 import Answer from "../components/answer";
-import { fetchPostInfo } from "../actions/actions";
 import axios from "axios";
-import { copyState } from "../utils/localStorage";
 
 class Post extends Component {
 	constructor(props) {
@@ -103,7 +100,6 @@ class Post extends Component {
 
 	render() {
 		const { question, answers, answer, edit, show } = this.state;
-		const { userName } = copyState().authentication;
 		return (
 			<div className="set-width mx-auto">
 				<div className="row">
@@ -113,7 +109,7 @@ class Post extends Component {
 							Submitted by:{" "}
 							<span className="text-primary">{question.user}</span>
 							{`, ${question.date}`}
-							{userName === question.user && (
+							{"userName" === question.user && (
 								<>
 									<i
 										className="fas fa-edit mt-2 small ml-2 mr-2 open_question"
@@ -167,12 +163,12 @@ class Post extends Component {
 	}
 }
 
-const mapStateToProps = (state) => ({
-	data: state.postDataRequest,
-});
+// const mapStateToProps = (state) => ({
+// 	data: state.postDataRequest,
+// });
 
-const mapDispatchToProps = (dispatch) => {
-	return { fetch: (id) => dispatch(fetchPostInfo(id)) };
-};
+// const mapDispatchToProps = (dispatch) => {
+// 	return { fetch: (id) => dispatch(fetchPostInfo(id)) };
+// };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Post);
+export default Post;

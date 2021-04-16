@@ -3,9 +3,6 @@
 import React, { Component } from 'react';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
-import { connect } from 'react-redux';
-import { copyState } from '../utils/localStorage';
-import { fetchCategoryInfo } from '../actions/actions';
 
 class Question extends Component {
 	constructor(props) {
@@ -20,14 +17,14 @@ class Question extends Component {
 		event.preventDefault();
 		const text = this.state.question;
 		const data = {
-			user: copyState().authentication.userName,
+			user: "shay",
 			category: this.props.match.params.subjectId,
 			question: text,
 		};
 		if (text.endsWith('?') && text.length >= 10) {
 			axios
 				.post('/question', data)
-				.then(this.props.dispatch(fetchCategoryInfo(this.props.match.params.subjectId)))
+				// .then(this.props.dispatch(fetchCategoryInfo(this.props.match.params.subjectId)))
 				.then(this.props.history.go(-1))
 				.catch(console.error());
 		} else {
@@ -49,7 +46,6 @@ class Question extends Component {
 	};
 
 	render() {
-		const { userName } = copyState().authentication;
 		return (
 			<div className='set-width mx-auto'>
 				<form id='question_form'>
@@ -57,7 +53,7 @@ class Question extends Component {
 						<div className='col'>
 							<div className='mb-2 text-danger small'>{this.state.error}</div>
 							<label htmlFor='question' className='d-block'>
-								{userName.toUpperCase()}, enter your question:
+								{'Shay'}, enter your question:
 							</label>
 							<textarea
 								id='question'
@@ -95,4 +91,4 @@ class Question extends Component {
 	}
 }
 
-export default connect()(Question);
+export default Question;

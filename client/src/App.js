@@ -1,34 +1,27 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
-import Home from './pages/home'
-import Signin from './pages/signin'
-import Error from './components/error'
-import PrivateRoute from './routes/private'
-import PublicRoute from './routes/public'
+/** @format */
+
+import React from "react";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { Provider } from "./context/context";
+import Home from "./pages/home";
+import Signin from "./pages/signin";
+import Error from "./components/error";
+import { loggedIn } from "./utils/localStorage"
 
 const App = () => {
+	return (
+		<Provider>
+			<BrowserRouter>
+				<Switch>
+					<Route exact path="/">
+						{loggedIn ? <Redirect to="/home" /> : <Signin />}
+					</Route>
+					<Route exact path="/home" component={Home} />
+					<Route component={Error} />
+				</Switch>
+			</BrowserRouter>
+		</Provider>
+	);
+};
 
-  return (
-    <BrowserRouter>
-      <div>
-        <Switch>
-          <Route exact path="/" render={() => <Redirect to="/login"/>}/>
-          <PublicRoute exact path="/login" component={Signin} />
-          <PrivateRoute path="/home" component={Home} />
-          <Route component={Error} />
-        </Switch>
-      </div>
-    </BrowserRouter>
-  )
-}
-
-const mapStateToProps = (state) => {
-  const { authentication, data_request } = state
-  return {
-    auth: authentication,
-    data: data_request
-  }
-}
-
-export default connect(mapStateToProps)(App);
+export default App;

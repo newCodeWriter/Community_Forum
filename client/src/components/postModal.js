@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-import { copyState } from "../utils/localStorage";
 import axios from "axios";
+import { useStateContext } from "../context/context";
 
 const PostModal = ({ show, answer, question, edit, close, update }) => {
 	const [error, setError] = useState("");
 	const [text, setText] = useState("");
 
-	const { userName } = copyState().authentication;
+	const { user } = useStateContext()
 
 	const handleTextChange = (event) => {
 		setText(event.target.value);
@@ -24,7 +24,7 @@ const PostModal = ({ show, answer, question, edit, close, update }) => {
 
 	const handleAnswer = () => {
 		const response = text.trim().replace(/(\r\n|\r)/gm, "\n");
-		const data = { user: userName, id: question.id, answer: response };
+		const data = { user: user, id: question.id, answer: response };
 		if (text.length >= 5) {
 			axios
 				.post("/answer", data)
