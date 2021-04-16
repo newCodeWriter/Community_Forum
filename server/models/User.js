@@ -28,8 +28,6 @@ const userSchema = new Schema({
 		type: String,
 		required: [true, 'password field is required'],
 		trim: true,
-		minLength: [6, 'password must be a minimum of 6 characters'],
-		maxLength: [40, 'password cannot exceed 40 characters']
 	},
 	questions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
 	responses: [{ type: Schema.Types.ObjectId, ref: "Answer" }],

@@ -28,10 +28,13 @@ module.exports = (data) => {
 
 	const validatePwd = (pwd, err) => {
 		const trimPwd = validator.trim(pwd);
-		if (validator.isLength(trimPwd, { min: 8, max: 40 })) {
+		const pwdPattern = new RegExp(
+			"(?=.*[A-Za-z])(?=.*[0-9])(?=.*[@$!%*#?&]).{8,}"
+		);
+		if (pwdPattern.test(trimPwd)) {
 			return trimPwd;
 		}
-		return (err["password"] = "Password must be at least 6 characters");
+		return (err["password"] = "Password does not match pattern");
 	};
 
 	data.name = data.name

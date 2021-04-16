@@ -7,6 +7,8 @@ const questionModel = require("../models/Question");
 const answerModel = require("../models/Answer");
 const validateRegistration = require("../validation/registration");
 const validateLogin = require("../validation/login");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const getRegistration = (req, res) => {
 	const { name, email, password } = req.body;
@@ -18,13 +20,13 @@ const getRegistration = (req, res) => {
 		.findOne({ username: name })
 		.then((user) => {
 			if (user) {
-				return res.status(400).json({ name: "name already in use" });
+				return res.status(400).json({ userExist: "username already in use" });
 			} else {
 				userModel
 					.findOne({ email: email }, "email")
 					.then((user) => {
 						if (user) {
-							return res.status(400).json({ email: "email already in use" });
+							return res.status(400).json({ emailExist: "email already in use" });
 						} else {
 							bcrypt.hash(password, 10, (err, hashPwd) => {
 								if (err) throw err;
@@ -33,18 +35,35 @@ const getRegistration = (req, res) => {
 									email: email,
 									password: hashPwd,
 								});
-								newUser.save();
-								return res.status(200).json({ status: "success" });
+								newUser
+									.save()
+									.then((user) => {
+										const userInfo = {
+											id: user._id,
+											name: user.username,
+											email: user.email,
+										};
+										// create access token for user
+										const accessToken = jwt.sign(
+											userInfo,
+											process.env.ACCESS_TOKEN_SECRET,
+											{ expiresIn: 3600 }
+										);
+										return res.status(200).json({ token: accessToken });
+									})
+									.catch((err) => {
+										res.status(400).json({ error: err.message });
+									});
 							});
 						}
 					})
 					.catch((err) => {
-						res.status(400).json({ message: err.message });
+						res.status(400).json({ error: err.message });
 					});
 			}
 		})
 		.catch((err) => {
-			res.status(400).json({ message: err.message });
+			res.status(400).json({ error: err.message });
 		});
 };
 
@@ -56,22 +75,21 @@ const getLogin = (req, res) => {
 	}
 	userModel
 		.find({ $or: [{ username: text }, { email: text }] })
-		.select("username password")
+		.select("username password email")
 		.then((user) => {
 			if (!user.length) {
 				return res
 					.status(400)
-					.json({ error: "username or email does not exist" });
+					.json({ text: "username or email does not exist" });
 			} else {
-				const userId = user[0]._id;
-				const userName = user[0].username;
 				const userPwd = user[0].password;
 				bcrypt.compare(password, userPwd, (error, match) => {
 					if (match) {
 						// create access token for user
 						const userInfo = {
-							name: userName,
-							id: userId,
+							id: user[0]._id,
+							name: user[0].username,
+							email: user[0].email,
 						};
 						const accessToken = jwt.sign(
 							userInfo,
@@ -86,7 +104,7 @@ const getLogin = (req, res) => {
 			}
 		})
 		.catch((err) => {
-			res.status(400).json({ message: err.message });
+			res.status(400).json({ error: err.message });
 		});
 };
 

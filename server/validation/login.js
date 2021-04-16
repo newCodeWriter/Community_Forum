@@ -12,7 +12,7 @@ module.exports = (data) => {
 			if (validator.isEmail(trimText)) {
 				return trimText;
 			}
-			return (err["email"] = "Email is invalid");
+			return (err["text"] = "Email is invalid");
 		} else {
 			const pattern = new RegExp(
 				"^(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}$"
@@ -20,7 +20,7 @@ module.exports = (data) => {
 			if (pattern.test(trimText)) {
 				return trimText;
 			}
-			return (err["name"] =
+			return (err["text"] =
 				"Username must be at least 4 characters with a minimum of 2 letters");
 		}
 	};
@@ -35,7 +35,7 @@ module.exports = (data) => {
 
 	data.text = data.text
 		? validateText(data.text, errors)
-		: (errors.email = "A username or an email is required");
+		: (errors.text = "A username or an email is required");
 
 	data.password = data.password
 		? validatePwd(data.password, errors)
