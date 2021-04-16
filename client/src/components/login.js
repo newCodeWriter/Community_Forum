@@ -1,33 +1,71 @@
 /** @format */
 
 import React, { useState } from "react";
+import { useDispatchContext } from "../context/context";
+import axios from "axios";
+import { useHistory } from "react-router-dom";
 
-const Login = ({ isDisabled, disableForm, loginUser, errors }) => {
+const Login = ({ isDisabled, disableForm }) => {
 	const [user, setUser] = useState("");
 	const [pwd, setPwd] = useState("");
+	const [userError, setUserError] = useState("");
+	const [pwdError, setPwdError] = useState("");
+
+	const dispatch = useDispatchContext();
+	const history = useHistory();
 
 	const handleUserInput = (event) => {
 		setUser(event.target.value);
-		errors.clear();
+		setUserError("");
 	};
 	const handlePwdInput = (event) => {
 		setPwd(event.target.value);
-		errors.clear();
+		setPwdError("");
 	};
 
-	const handleLogin = (event) => {
+	const handleLogin = async (event) => {
 		event.preventDefault();
-		const data = {
-			username: user.trim().toLowerCase(),
-			password: pwd.trim(),
-		};
-		loginUser(data);
+		const text = user.trim().toLowerCase();
+		const password = pwd.trim();
+		if (text.length >= 4 && password.length >= 8) {
+			const data = {
+				text: text,
+				password: password,
+			};
+			try {
+				const response = await axios.post(`/api/users/login`, data);
+				if (response.data.token) {
+					localStorage.setItem("token", response.data.token);
+					await dispatch({ type: "LOGIN_USER_SUCCESS", payload: response.data });
+					history.push("/home");
+				} else {
+					if (response.data.text) {
+						setUserError(response.data.text);
+					} else if (response.data.password) {
+						setPwdError(response.data.password);
+					} else if (response.data.error) {
+						console.error(response.data.error);
+					}
+					dispatch({ type: "LOGIN_USER_FAILURE" });
+				}
+			} catch (err) {
+				console.error(err);
+			}
+		} else {
+			if (text.length < 4) {
+				setUserError("This field must have at least 4 characters");
+			} else if (password.length < 8) {
+				setPwdError("This field must have at least 8 characters");
+			}
+		}
 	};
 
 	const switchToRegistration = () => {
 		setUser("");
 		setPwd("");
-		disableForm(true);
+		setUserError("");
+		setPwdError("");
+		disableForm();
 	};
 
 	const loginStyle = { cursor: isDisabled ? "not-allowed" : "pointer" };
@@ -48,16 +86,14 @@ const Login = ({ isDisabled, disableForm, loginUser, errors }) => {
 						onChange={handleUserInput}
 						name="logUser"
 						id="logUser"
-						placeholder="Username"
+						placeholder="Username or Email"
 						minLength="4"
 						disabled={isDisabled}
 						value={user}
 					/>
 				</div>
-				{errors.user && (
-					<div className="text-danger small errors">
-						This user does not exist.
-					</div>
+				{userError && (
+					<div className="text-danger small errors">{userError}</div>
 				)}
 				<div className="input-group mt-3">
 					<div className="input-group-prepend">
@@ -77,11 +113,7 @@ const Login = ({ isDisabled, disableForm, loginUser, errors }) => {
 						value={pwd}
 					/>
 				</div>
-				{errors.pwd && (
-					<div className="text-danger small errors">
-						You entered an incorrect password.
-					</div>
-				)}
+				{pwdError && <div className="text-danger small errors">{pwdError}</div>}
 				<button
 					type="submit"
 					className="btn btn-primary mt-4 pl-4 pr-4 pt-2 pb-2 d-block ml-auto log"

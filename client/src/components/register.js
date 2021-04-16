@@ -1,75 +1,116 @@
 /** @format */
 
 import React, { useState } from "react";
+import { useDispatchContext } from "../context/context";
+import { useHistory } from "react-router-dom";
 import axios from "axios";
+import validator from "validator";
 
-const Register = ({ confirm, isDisabled, disableForm }) => {
+const Register = ({ isDisabled, disableForm }) => {
 	const [user, setUser] = useState("");
+	const [email, setEmail] = useState("");
 	const [pwd1, setPwd1] = useState("");
 	const [pwd2, setPwd2] = useState("");
-	const [userError, setUserError] = useState({ client: false, server: false });
-	const [pwdError, setPwdError] = useState({ test: false, match: false });
+	const [userError, setUserError] = useState(false);
+	const [userExistError, setUserExistError] = useState(false);
+	const [emailError, setEmailError] = useState(false);
+	const [emailExistError, setEmailExistError] = useState(false);
+	const [pwdTestError, setPwdTestError] = useState(false);
+	const [pwdMatchError, setPwdMatchError] = useState(false);
 
-	const resetState = () => {
-		setUser("");
-		setPwd1("");
-		setPwd2("");
-		setUserError({ client: false, server: false });
-		setPwdError({ test: false, match: false });
-	};
+	const dispatch = useDispatchContext();
+	const history = useHistory();
 
 	const handleUserInput = (event) => {
 		setUser(event.target.value);
-		setUserError({ client: false, server: false });
+		setUserError(false);
+		setUserExistError(false);
+	};
+	const handleEmailInput = (event) => {
+		setEmail(event.target.value);
+		setEmailError(false);
+		setEmailExistError(false);
 	};
 	const handlePwdInput = (event) => {
-		const value = event.target.value;
-		event.target.name === "regPwd1" ? setPwd1(value) : setPwd2(value);
-		setPwdError({ test: false, match: false });
+		const target = event.target;
+		target.name === "regPwd1" ? setPwd1(target.value) : setPwd2(target.value);
+		setPwdTestError(false);
+		setPwdMatchError(false);
 	};
 
-	const checkUsername = () => {
+	const validName = () => {
 		const userPattern = new RegExp(
 			"^(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}$"
 		);
 		return userPattern.test(user);
 	};
-	const checkPwd = () => {
+	const validEmail = () => {
+		return validator.isEmail(email);
+	};
+	const validPwd = () => {
 		const pwdPattern = new RegExp(
 			"(?=.*[A-Za-z])(?=.*[0-9])(?=.*[@$!%*#?&]).{8,}"
 		);
 		return pwdPattern.test(pwd1);
 	};
 
-	const handleRegister = (event) => {
+	const handleRegister = async (event) => {
 		event.preventDefault();
-		if (checkUsername() && checkPwd() && pwd1 === pwd2) {
+		if (validName() && validEmail() && validPwd() && pwd1 === pwd2) {
 			const newUser = {
-				user: user.trim().toLowerCase(),
+				name: user.trim().toLowerCase(),
+				email: email.trim().toLowerCase(),
 				password: pwd1.trim(),
 			};
-			axios
-				.post(`/register`, newUser)
-				.then((res) => {
-					resetState();
-					confirm("You are now registered. Please log in.");
-				})
-				.catch((err) => {
-					err.response.status === 409
-						? setUserError({ ...userError, server: true })
-						: console.log(err);
-				});
-		} else if (!checkUsername()) {
-			setUserError({ ...userError, client: true });
-		} else if (!checkPwd()) {
-			setPwdError({ ...pwdError, test: true });
+			try {
+				const response = await axios.post(`api/users/register`, newUser);
+				if (response.data.token) {
+					localStorage.setItem("token", response.data.token);
+					await dispatch({ type: "LOGIN_USER_SUCCESS", payload: response.data });
+					history.push("/home");
+				} else {
+					if (response.data.name) {
+						setUserError(true);
+					} else if (response.data.userExist) {
+						setUserExistError(true);
+					} else if (response.data.email) {
+						setEmailError(true);
+					} else if (response.data.emailExist) {
+						setEmailExistError(true);
+					} else if (response.data.password) {
+						setPwdTestError(true);
+					} else if (response.data.error) {
+						console.error(response.data.error);
+					}
+					dispatch({ type: "LOGIN_USER_FAILURE" });
+				}
+			} catch (err) {
+				console.error(err);
+			}
 		} else {
-			setPwdError({ ...pwdError, match: true });
+			if (!validName()) {
+				setUserError(true);
+			} else if (!validEmail()) {
+				setEmailError(true);
+			} else if (!validPwd()) {
+				setPwdTestError(true);
+			} else {
+				setPwdMatchError(true);
+			}
 		}
 	};
 
 	const switchToLogin = () => {
-		resetState();
+		setUser("");
+		setEmail("");
+		setPwd1("");
+		setPwd2("");
+		setUserError(false);
+		setUserExistError(false);
+		setEmailError(false);
+		setEmailExistError(false);
+		setPwdTestError(false);
+		setPwdMatchError(false);
 		disableForm();
 	};
 
@@ -94,7 +135,7 @@ const Register = ({ confirm, isDisabled, disableForm }) => {
 						disabled={isDisabled}
 					/>
 				</div>
-				{userError.client && (
+				{userError && (
 					<ul className="text-danger small errors">
 						Your username must have:
 						<li className="reg-error">At least four characters</li>
@@ -102,9 +143,31 @@ const Register = ({ confirm, isDisabled, disableForm }) => {
 						<li className="reg-error">No spaces</li>
 					</ul>
 				)}
-				{userError.server && (
+				{userExistError && (
 					<div className="text-danger small errors">
 						This user already exists. Please try another username.
+					</div>
+				)}
+				<div className="input-group mt-3">
+					<input
+						type="email"
+						className="form-control reg"
+						name="regEmail"
+						id="regEmail"
+						value={email}
+						placeholder="Email"
+						onChange={handleEmailInput}
+						disabled={isDisabled}
+					/>
+				</div>
+				{emailError && (
+					<div className="text-danger small errors">
+						Please enter a valid email address.
+					</div>
+				)}
+				{emailExistError && (
+					<div className="text-danger small errors">
+						This email is already registered.
 					</div>
 				)}
 				<div className="input-group mt-3">
@@ -119,7 +182,7 @@ const Register = ({ confirm, isDisabled, disableForm }) => {
 						disabled={isDisabled}
 					/>
 				</div>
-				{pwdError.test && (
+				{pwdTestError && (
 					<ul className="text-danger small errors">
 						Your password must contain:
 						<li className="reg-error">At least eight characters</li>
@@ -140,7 +203,7 @@ const Register = ({ confirm, isDisabled, disableForm }) => {
 						disabled={isDisabled}
 					/>
 				</div>
-				{pwdError.match && (
+				{pwdMatchError && (
 					<div className="text-danger small errors">
 						Your passwords do not match.
 					</div>
@@ -153,7 +216,6 @@ const Register = ({ confirm, isDisabled, disableForm }) => {
 							id="terms"
 							className="form-check-input reg"
 							disabled={isDisabled}
-							checked={isDisabled ? false : null}
 							required
 						/>
 						I agree to the Terms and Conditions and Privacy Policy
