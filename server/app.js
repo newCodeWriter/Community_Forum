@@ -4,6 +4,7 @@ require("dotenv").config();
 const express = require("express");
 const { join } = require("path");
 const logger = require("morgan");
+const cors = require("cors");
 const userRoutes = require("./routes/users");
 
 //connect to Mongodb database
@@ -15,9 +16,11 @@ const { json, urlencoded } = express;
 
 const app = express();
 
+app.use(cors({ origin: true, credentials: true }));
 app.use(logger("dev"));
 app.use(json());
 app.use(urlencoded({ extended: false }));
+app.use(express.static(join(__dirname, "public")));
 
 app.use("/api/users", userRoutes);
 
