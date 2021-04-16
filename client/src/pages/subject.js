@@ -1,90 +1,62 @@
 /** @format */
 
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
-import { Link } from "react-router-dom";
-import { connect } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
 import axios from "axios";
-import PropTypes from "prop-types";
 
-class Subject extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			questions: [],
+const Subject = ({ match }) => {
+	const [questions, setQuestions] = useState([]);
+	const history = useHistory();
+
+	useEffect(() => {
+		const fetchQuestions = async () => {
+			try {
+				const response = await axios.get(`/category/${match.params.subjectId}`);
+				setQuestions([...response.data]);
+			} catch (err) {
+				console.error(err);
+			}
 		};
-	}
+		fetchQuestions();
+	}, [match.params.subjectId]);
 
-	componentDidMount() {
-		axios
-			.get(`/category/${this.props.match.params.subjectId}`)
-			.then((res) => this.setState({ questions: [...res.data] }));
-	}
+	const newQuestion = () => history.push(`${match.url}/question`);
 
-	componentDidUpdate(prevProps) {
-		if (this.props.data !== prevProps.data) {
-			this.setState({ questions: [...this.props.data] });
-		}
-	}
-
-	newQuestion = () =>
-		this.props.history.push(`${this.props.match.url}/question`);
-
-	render() {
-		const { questions } = this.state;
-		const { url } = this.props.match;
-
-		return (
-			<div className="set-width mx-auto">
-				<Button
-					variant="primary"
-					className="mb-4 pl-3 pr-3 pt-2 pb-2"
-					onClick={this.newQuestion}
-				>
-					New Question?
-				</Button>
-				{questions.map((q) => (
-					<Link
-						key={`question_${q.question_id}`}
-						to={`${url}/${q.question_id}`}
+	return (
+		<div className="set-width mx-auto">
+			<Button
+				variant="primary"
+				className="mb-4 pl-3 pr-3 pt-2 pb-2"
+				onClick={newQuestion}
+			>
+				New Question?
+			</Button>
+			{questions.map((q) => (
+				<Link key={`question_${q.question_id}`} to={`${match.url}/${q.question_id}`}>
+					<div
+						id={q.question_id}
+						className="border border-light bg-light d-block mb-3 p-3 subject-container shadow"
 					>
-						<div
-							id={q.question_id}
-							className="border border-light bg-light d-block mb-3 p-3 subject-container shadow"
-						>
-							<div className="row">
-								<div className="col-md-5 text-muted small">
-									{q.question_date}
-								</div>
-								<div className="col-md-7 text-success text-right small q-user">
-									by: {q.submit_user}
-								</div>
-							</div>
-							<div className="row mt-3 w-100">
-								<div className="col">{q.question}</div>
-							</div>
-							<div className="row mt-2 text-muted">
-								<div className="col text-right small">
-									Answers: {q.responses.length}
-								</div>
+						<div className="row">
+							<div className="col-md-5 text-muted small">{q.question_date}</div>
+							<div className="col-md-7 text-success text-right small q-user">
+								by: {q.submit_user}
 							</div>
 						</div>
-					</Link>
-				))}
-			</div>
-		);
-	}
-}
-const mapStateToProps = (state) => ({
-	data: state.categoryDataRequest,
-});
-
-Subject.propTypes = {
-	match: PropTypes.shape({
-		params: PropTypes.shape({
-			subjectId: PropTypes.string,
-		}),
-	}),
+						<div className="row mt-3 w-100">
+							<div className="col">{q.question}</div>
+						</div>
+						<div className="row mt-2 text-muted">
+							<div className="col text-right small">
+								Answers: {q.responses.length}
+							</div>
+						</div>
+					</div>
+				</Link>
+			))}
+		</div>
+	);
 };
 
-export default connect(mapStateToProps)(Subject);
+export default Subject;
