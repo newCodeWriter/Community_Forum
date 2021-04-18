@@ -10,7 +10,7 @@ const userSchema = new Schema({
 		required: [true, "username field is required"],
 		trim: true,
 		lowercase: true,
-		minLength: [4, 'username must be at least 4 characters'],
+		minLength: [4, "username must be at least 4 characters"],
 	},
 	email: {
 		type: String,
@@ -26,11 +26,11 @@ const userSchema = new Schema({
 	},
 	password: {
 		type: String,
-		required: [true, 'password field is required'],
+		required: [true, "password field is required"],
 		trim: true,
 	},
 	questions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
-	responses: [{ type: Schema.Types.ObjectId, ref: "Answer" }],
+	responses: [{ type: Schema.Types.ObjectId, ref: "Answer" }]
 });
 
 const User = mongoose.model("User", userSchema);
