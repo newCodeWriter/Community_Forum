@@ -25,7 +25,8 @@ const questionSchema = new Schema({
 	},
 	question: { type: String, required: true, trim: true },
 	user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-	date: { type: Date, required: true },
+	created: { type: String, required: true },
+	answers: [{ type: Schema.Types.ObjectId, ref: "Answer" }],
 });
 
 const Question = mongoose.model("Question", questionSchema);
