@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useDispatchContext } from "../context/context";
-import { useHistory } from "react-router-dom";
 import axios from "axios";
 import validator from "validator";
 
@@ -19,7 +18,6 @@ const Register = ({ isDisabled, disableForm }) => {
 	const [pwdMatchError, setPwdMatchError] = useState(false);
 
 	const dispatch = useDispatchContext();
-	const history = useHistory();
 
 	const handleUserInput = (event) => {
 		setUser(event.target.value);
@@ -64,28 +62,31 @@ const Register = ({ isDisabled, disableForm }) => {
 			};
 			try {
 				const response = await axios.post(`api/users/register`, newUser);
-				if (response.data.token) {
-					localStorage.setItem("token", response.data.token);
-					await dispatch({ type: "LOGIN_USER_SUCCESS", payload: response.data });
-					history.push("/home");
-				} else {
-					if (response.data.name) {
-						setUserError(true);
-					} else if (response.data.userExist) {
-						setUserExistError(true);
-					} else if (response.data.email) {
-						setEmailError(true);
-					} else if (response.data.emailExist) {
-						setEmailExistError(true);
-					} else if (response.data.password) {
-						setPwdTestError(true);
-					} else if (response.data.error) {
-						console.error(response.data.error);
-					}
-					dispatch({ type: "LOGIN_USER_FAILURE" });
+				if (response.data.user) {
+					dispatch({ type: "LOGIN_USER_SUCCESS", payload: response.data.user });
+					localStorage.setItem(
+						"auth",
+						JSON.stringify({ user: response.data.user.name })
+					);
 				}
 			} catch (err) {
-				console.error(err);
+				const { data } = err.response;
+				if (err.response) {
+					if (data.name) {
+						setUserError(true);
+					} else if (data.userExist) {
+						setUserExistError(true);
+					} else if (data.email) {
+						setEmailError(true);
+					} else if (data.emailExist) {
+						setEmailExistError(true);
+					} else if (data.password) {
+						setPwdTestError(true);
+					}
+				} else {
+					console.error(err.message);
+				}
+				dispatch({ type: "LOGIN_USER_FAILURE" });
 			}
 		} else {
 			if (!validName()) {

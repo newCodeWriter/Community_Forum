@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useDispatchContext } from "../context/context";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
+import validator from "validator";
 
 const Login = ({ isDisabled, disableForm }) => {
 	const [user, setUser] = useState("");
@@ -12,7 +12,6 @@ const Login = ({ isDisabled, disableForm }) => {
 	const [pwdError, setPwdError] = useState("");
 
 	const dispatch = useDispatchContext();
-	const history = useHistory();
 
 	const handleUserInput = (event) => {
 		setUser(event.target.value);
@@ -23,39 +22,46 @@ const Login = ({ isDisabled, disableForm }) => {
 		setPwdError("");
 	};
 
+	const validText = (text) => {
+		const userPattern = new RegExp(
+			"^(?=.*[A-Za-z].*[A-Za-z])[A-Za-z0-9@$!%*#?&]{4,}$"
+		);
+		if (text.includes("@")) {
+			return validator.isEmail(text);
+		}
+		return userPattern.test(text);
+	};
+
 	const handleLogin = async (event) => {
 		event.preventDefault();
-		const text = user.trim().toLowerCase();
-		const password = pwd.trim();
-		if (text.length >= 4 && password.length >= 8) {
-			const data = {
-				text: text,
-				password: password,
-			};
+		if (validText(user) && pwd) {
+			const data = { text: user.trim().toLowerCase(), password: pwd.trim() };
 			try {
 				const response = await axios.post(`/api/users/login`, data);
-				if (response.data.token) {
-					localStorage.setItem("token", response.data.token);
-					await dispatch({ type: "LOGIN_USER_SUCCESS", payload: response.data });
-					history.push("/home");
-				} else {
-					if (response.data.text) {
-						setUserError(response.data.text);
-					} else if (response.data.password) {
-						setPwdError(response.data.password);
-					} else if (response.data.error) {
-						console.error(response.data.error);
-					}
-					dispatch({ type: "LOGIN_USER_FAILURE" });
+				if (response.data.user) {
+					dispatch({ type: "LOGIN_USER_SUCCESS", payload: response.data.user });
+					localStorage.setItem(
+						"auth",
+						JSON.stringify({ user: response.data.user.name })
+					);
 				}
 			} catch (err) {
-				console.error(err);
+				if (err.response) {
+					if (err.response.data.text) {
+						setUserError(err.response.data.text);
+					} else if (err.response.data.password) {
+						setPwdError(err.response.data.password);
+					}
+				} else {
+					console.error(err.message);
+				}
+				dispatch({ type: "LOGIN_USER_FAILURE" });
 			}
 		} else {
-			if (text.length < 4) {
-				setUserError("This field must have at least 4 characters");
-			} else if (password.length < 8) {
-				setPwdError("This field must have at least 8 characters");
+			if (!validText(user)) {
+				setUserError("Please enter a username or a valid email");
+			} else if (!pwd) {
+				setPwdError("Please enter a password");
 			}
 		}
 	};
