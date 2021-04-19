@@ -4,13 +4,14 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
-	font-family: 'Playfair Display', serif;
+	font-family: "Playfair Display", serif;
 }
-body, #root{
+body,
+#root {
 	max-height: 100vh;
 }
 .bg-image {
-	background-image: url('../src/assets/mathbg.jpg');
+	background-image: url("../src/assets/mathbg.jpg");
 	height: 100vh;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -37,6 +38,13 @@ body, #root{
 }
 .profile:hover {
 	background-color: #bcc0c2;
+	color: #212529;
+}
+.profile {
+	display: block;
+	width: 100%;
+	padding: 0.25rem 1.5rem;
+	color: #212529;
 }
 a {
 	text-decoration: none !important;
@@ -61,8 +69,13 @@ a {
 .fas {
 	cursor: pointer;
 }
-.yolo{
-  max-height: 100vh;
+.yolo {
+	max-height: 100vh;
+}
+#math,
+#math.active {
+	color: white;
+	font-size: 1.5em;
 }
 
 /* media queries */
