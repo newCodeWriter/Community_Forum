@@ -42,7 +42,7 @@ const Login = ({ isDisabled, disableForm }) => {
 					dispatch({ type: "LOGIN_USER_SUCCESS", payload: response.data.user });
 					localStorage.setItem(
 						"auth",
-						JSON.stringify({ user: response.data.user.name })
+						JSON.stringify({ auth: true })
 					);
 				}
 			} catch (err) {
