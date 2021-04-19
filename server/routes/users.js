@@ -2,13 +2,14 @@
 
 const express = require("express");
 const router = express.Router();
-const userModel = require("../models/User");
-const questionModel = require("../models/Question");
-const answerModel = require("../models/Answer");
+const User = require("../models/User");
+const Question = require("../models/Question");
+const Answer = require("../models/Answer");
 const validateRegistration = require("../validation/registration");
 const validateLogin = require("../validation/login");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const auth = require("../middleware/authentication");
 
 const getRegistration = (req, res) => {
 	const { name, email, password } = req.body;
@@ -16,54 +17,56 @@ const getRegistration = (req, res) => {
 	if (!isValid) {
 		return res.status(400).json(errors);
 	}
-	userModel
-		.findOne({ username: name })
+	User.findOne({ username: name })
 		.then((user) => {
 			if (user) {
-				return res.status(400).json({ userExist: "username already in use" });
+				return res.status(409).json({ userExist: "username already in use" });
 			} else {
-				userModel
-					.findOne({ email: email }, "email")
+				User.findOne({ email }, "email")
 					.then((user) => {
 						if (user) {
-							return res.status(400).json({ emailExist: "email already in use" });
+							return res
+								.status(409)
+								.json({ emailExist: "email already in use" });
 						} else {
 							bcrypt.hash(password, 10, (err, hashPwd) => {
 								if (err) throw err;
-								const newUser = new userModel({
+								const newUser = new User({
 									username: name,
-									email: email,
+									email,
 									password: hashPwd,
 								});
 								newUser
 									.save()
 									.then((user) => {
-										const userInfo = {
-											id: user._id,
-											name: user.username,
-											email: user.email,
-										};
-										// create access token for user
-										const accessToken = jwt.sign(
+										const userInfo = { id: user._id, name: user.username };
+										// create access token
+										const token = jwt.sign(
 											userInfo,
 											process.env.ACCESS_TOKEN_SECRET,
-											{ expiresIn: 3600 }
+											{ expiresIn: process.env.ACCESS_TOKEN_EXPIRATION }
 										);
-										return res.status(200).json({ token: accessToken });
+										res.cookie("token", token, {
+											httpOnly: true,
+											maxAge: process.env.ACCESS_TOKEN_EXPIRATION * 1000,
+											secure: process.env.NODE_ENV === "production",
+											sameSite: "strict",
+										});
+										res.status(201).json({ user: { ...userInfo } });
 									})
 									.catch((err) => {
-										res.status(400).json({ error: err.message });
+										res.status(502).json({ error: err.message });
 									});
 							});
 						}
 					})
 					.catch((err) => {
-						res.status(400).json({ error: err.message });
+						res.status(502).json({ error: err.message });
 					});
 			}
 		})
 		.catch((err) => {
-			res.status(400).json({ error: err.message });
+			res.status(500).json({ error: err.message });
 		});
 };
 
@@ -73,45 +76,42 @@ const getLogin = (req, res) => {
 	if (!isValid) {
 		return res.status(400).json(errors);
 	}
-	userModel
-		.find({ $or: [{ username: text }, { email: text }] })
+	User.find({ $or: [{ username: text }, { email: text }] })
 		.select("username password email")
 		.then((user) => {
 			if (!user.length) {
 				return res
-					.status(400)
+					.status(404)
 					.json({ text: "username or email does not exist" });
 			} else {
 				const userPwd = user[0].password;
 				bcrypt.compare(password, userPwd, (error, match) => {
 					if (match) {
-						// create access token for user
-						const userInfo = {
-							id: user[0]._id,
-							name: user[0].username,
-							email: user[0].email,
-						};
-						const accessToken = jwt.sign(
-							userInfo,
-							process.env.ACCESS_TOKEN_SECRET,
-							{ expiresIn: 3600 }
-						);
-						return res.status(200).json({ token: accessToken });
+						const userInfo = { id: user[0]._id, name: user[0].username };
+						// create access token
+						const token = jwt.sign(userInfo, process.env.ACCESS_TOKEN_SECRET);
+						// create cookies
+						res.cookie("token", token, {
+							httpOnly: true,
+							maxAge: process.env.ACCESS_TOKEN_EXPIRATION * 1000,
+							secure: process.env.NODE_ENV === "production",
+							sameSite: "strict",
+						});
+						res.status(200).json({ user: { ...userInfo } });
 					} else {
-						return res.status(400).json({ password: "wrong password" });
+						return res.status(404).json({ password: "wrong password" });
 					}
 				});
 			}
 		})
 		.catch((err) => {
-			res.status(400).json({ error: err.message });
+			res.status(500).json({ error: err.message });
 		});
 };
 
 const checkName = (req, res) => {
 	const { newName } = req.body;
-	userModel
-		.findOne({ username: newName })
+	User.findOne({ username: newName })
 		.select("username")
 		.then((user) => {
 			if (user) {
@@ -119,16 +119,12 @@ const checkName = (req, res) => {
 			} else {
 				return res.send("ok");
 			}
-		})
-		.catch((err) => {
-			throw err;
 		});
 };
 
 const checkEmail = (req, res) => {
 	const { email } = req.body;
-	userModel
-		.findOne({ email: email })
+	User.findOne({ email: email })
 		.select("email")
 		.then((user) => {
 			if (user) {
@@ -136,43 +132,48 @@ const checkEmail = (req, res) => {
 			} else {
 				return res.send("ok");
 			}
-		})
-		.catch((err) => {
-			throw err;
 		});
 };
 
-const updateUserName = async (req, res) => {
-	const { id, name } = req.body;
-	const user = await userModel.findById(id);
+const updateUserName = (req, res) => {
+	const { name } = req.body;
+	const user = response.locals.user;
 	user.username = name;
 	user
 		.save()
 		.then((updatedUser) => {
-			res.json({ message: "username updated", data: { user: updatedUser } });
+			const { _id, username, email } = updatedUser;
+			res.json({
+				success: "username updated",
+				user: { id: _id, username, email },
+			});
 		})
 		.catch((err) => {
-			throw err;
+			res.status(400).json({ error: err.message });
 		});
 };
 
-const updateEmail = async (req, res) => {
-	const { id, email } = req.body;
-	const user = await userModel.findById(id);
+const updateEmail = (req, res) => {
+	const { email } = req.body;
+	const user = res.locals.user;
 	user.email = email;
 	user
 		.save()
 		.then((updatedUser) => {
-			res.json({ message: "email updated", data: { user: updatedUser } });
+			const { _id, username, email } = updatedUser;
+			res.status(200).json({
+				success: "email updated",
+				user: { id: _id, username, email },
+			});
 		})
 		.catch((err) => {
-			throw err;
+			res.status(400).json({ error: err.message });
 		});
 };
 
-const updatePassword = async (req, res) => {
-	const { id, oldPwd, newPwd } = req.body;
-	const user = await userModel.findById(id);
+const updatePassword = (req, res) => {
+	const { oldPwd, newPwd } = req.body;
+	const user = res.locals.user;
 	bcrypt.compare(oldPwd, user.password, (error, match) => {
 		if (error) throw error;
 		else {
@@ -182,11 +183,8 @@ const updatePassword = async (req, res) => {
 					user.password = hashPwd;
 					user
 						.save()
-						.then((updatedUser) => {
-							return res.json({
-								message: "password updated",
-								data: { user: updatedUser },
-							});
+						.then(() => {
+							return res.status(200);
 						})
 						.catch((err) => {
 							throw err;
@@ -199,27 +197,46 @@ const updatePassword = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-	const { userId } = req.params;
+	const userId = res.locals.user._id;
 	//  delete user
-	const removeUser = await userModel.findByIdAndRemove(userId);
+	const removeUser = await User.findByIdAndDelete(userId);
 	// delete questions submitted by user
-	const removeQuestions = await questionModel.deleteMany({ user: userId });
+	const removeQuestions = await Question.deleteMany({ user: userId });
 	// delete answers submitted by user
-	const removeAnswers = await answerModel.deleteMany({ user: userId });
+	const removeAnswers = await Answer.deleteMany({ user: userId });
 	Promise.all([removeUser, removeQuestions, removeAnswers])
-		.then(res.json({ success: "user deleted" }))
+		.then(() => {
+			logout();
+		})
 		.catch((err) => {
-			console.error(err);
+			console.error(err.message);
 		});
+};
+
+const logout = (req, res) => {
+	res.clearCookie("token", {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === "production",
+		sameSite: "strict",
+		path: "/",
+	});
+	res.redirect("/");
+};
+
+const authorized = (req, res) => {
+	const { _id, username } = res.locals.user;
+	return res.json({ user: { id: _id, name: username } });
 };
 
 router.post("/register", getRegistration);
 router.post("/login", getLogin);
-router.get("/check/name", checkName);
-router.get("/check/email", checkEmail);
-router.put("/update/user", updateUserName);
-router.put("/update/email", updateEmail);
-router.put("/update/password", updatePassword);
-router.delete("/delete/:userId", deleteUser);
+router.get("/check/name", auth, checkName);
+router.get("/check/email", auth, checkEmail);
+router.put("/update/user", auth, updateUserName);
+router.put("/update/email", auth, updateEmail);
+router.put("/update/password", auth, updatePassword);
+router.delete("/delete/user", auth, deleteUser);
+router.get("/logout", logout);
+router.get("/token", auth, authorized);
 
 module.exports = router;
