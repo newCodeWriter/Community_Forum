@@ -36,7 +36,6 @@ const Post = () => {
 	useEffect(() => {
 		if (postData) {
 			fetchAnswers();
-			console.log("hit it");
 		}
 	}, [postData]);
 
