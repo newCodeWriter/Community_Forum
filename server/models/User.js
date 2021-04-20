@@ -30,7 +30,7 @@ const userSchema = new Schema({
 		trim: true,
 	},
 	questions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
-	responses: [{ type: Schema.Types.ObjectId, ref: "Answer" }]
+	answers: [{ type: Schema.Types.ObjectId, ref: "Answer" }]
 });
 
 const User = mongoose.model("User", userSchema);

@@ -23,7 +23,12 @@ const questionSchema = new Schema({
 			"trigonometry",
 		],
 	},
-	question: { type: String, required: true, trim: true },
+	question: {
+		type: String,
+		required: true,
+		trim: true,
+		minLength: [10, "question must be at least 10 characters"],
+	},
 	user: { type: Schema.Types.ObjectId, ref: "User", required: true },
 	created: { type: String, required: true },
 	answers: [{ type: Schema.Types.ObjectId, ref: "Answer" }],
