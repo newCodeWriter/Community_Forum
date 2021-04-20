@@ -5,11 +5,11 @@ import { Button, Modal } from "react-bootstrap";
 import axios from "axios";
 import { useStateContext } from "../context/context";
 
-const PostModal = ({ show, answer, question, edit, close, update }) => {
+const PostModal = ({ open, close, type, update }) => {
 	const [error, setError] = useState("");
 	const [text, setText] = useState("");
 
-	const { user } = useStateContext()
+	const { user } = useStateContext();
 
 	const handleTextChange = (event) => {
 		setText(event.target.value);
@@ -22,51 +22,73 @@ const PostModal = ({ show, answer, question, edit, close, update }) => {
 		setError("");
 	};
 
-	const handleAnswer = () => {
-		const response = text.trim().replace(/(\r\n|\r)/gm, "\n");
-		const data = { user: user, id: question.id, answer: response };
+	const handleAnswer = async () => {
+		const answer = text.trim().replace(/(\r\n|\r)/gm, "\n");
+		const data = {
+			userId: user,
+			questionId: type.answer.questionId,
+			answer: answer,
+		};
 		if (text.length >= 5) {
-			axios
-				.post("/answer", data)
-				.then(update())
-				.then(handleClose)
-				.catch((err) => setError(err));
+			try {
+				const response = await axios.post("/api/answers/answer", data);
+				if (response.status === 200) {
+					handleClose();
+					update();
+				}
+			} catch (err) {
+				console.error(err.message);
+			}
 		} else {
 			setError("You must enter at least 5 characters.");
 		}
 	};
 
-	const handleAnswerUpdate = () => {
-		const original = answer.original;
-		const updated = text.trim();
-		if (updated.length >= 5 && original !== updated) {
-			const replace = updated.replace(/(\r\n|\r)/gm, "\n");
-			const data = { update: replace, category: question.category };
+	const handleAnswerUpdate = async () => {
+		const original = type.updateAnswer.answer;
+		const update = text.trim();
+		if (update.length >= 5 && original !== update) {
+			const replace = update.replace(/(\r\n|\r)/gm, "\n");
+			const data = { update: replace };
 
-			axios
-				.put(`/update/answer/${answer.id}`, data)
-				.then(update())
-				.then(handleClose)
-				.catch((err) => setError(err));
-		} else if (original === updated) {
+			try {
+				const response = await axios.put(
+					`/api/answers/update/answer/${answer.id}`,
+					data
+				);
+				if (response.status === 200) {
+					handleClose();
+					update();
+				}
+			} catch (err) {
+				console.error(err.message);
+			}
+		} else if (original === update) {
 			setError("You have made no changes. Please update or press cancel.");
 		} else {
 			setError("You must enter at least 5 characters.");
 		}
 	};
 
-	const handleQuestionUpdate = () => {
-		const original = question.question;
-		const updated = text.trim();
-		const data = { update: updated, category: question.category };
-		if (original === updated) {
+	const handleQuestionUpdate = async () => {
+		const original = type.question.question;
+		const update = text.trim();
+		const data = { update: update };
+		if (original === update) {
 			setError("You have made no changes. Please update or press cancel.");
-		} else if (updated.endsWith("?") && updated.length >= 10) {
-			axios
-				.put(`/update/question/${question.id}`, data)
-				.then(update())
-				.then(handleClose)
-				.catch((err) => setError(err));
+		} else if (update.endsWith("?") && update.length >= 10) {
+			try {
+				const response = await axios.put(
+					`/api/questions/update/question/${type.question.id}`,
+					data
+				);
+				if (response.status === 200) {
+					handleClose();
+					update();
+				}
+			} catch (err) {
+				console.error(err.message);
+			}
 		} else {
 			setError(
 				'Your question must end with a "?" and be at least 10 characters long.'
@@ -75,13 +97,13 @@ const PostModal = ({ show, answer, question, edit, close, update }) => {
 	};
 
 	return (
-		<Modal show={show.que || show.ans} onHide={handleClose} centered>
+		<Modal open={open} onHide={handleClose} centered>
 			<Modal.Body>
 				<>
 					<label htmlFor="modal" className="d-block mb-3">
-						{edit.que
-							? `${question.user.toUpperCase()}, update your question:`
-							: question.question}
+						{type.question && `Update your question:`}
+						{type.answer && type.answer.question}
+						{type.updateAnswer && type.updateAnswer.question}
 					</label>
 					<div className="text-danger small mb-2">{error}</div>
 					<textarea
@@ -93,10 +115,12 @@ const PostModal = ({ show, answer, question, edit, close, update }) => {
 						rows="7"
 						cols="56"
 					></textarea>
-					{edit.que || edit.ans ? (
+					{type.question || type.updateAnswer ? (
 						<Button
 							variant="primary"
-							onClick={edit.que ? handleQuestionUpdate : handleAnswerUpdate}
+							onClick={
+								type.question ? handleQuestionUpdate : handleAnswerUpdate
+							}
 							className="mr-3"
 						>
 							Update
