@@ -7,6 +7,8 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const cors = require("cors");
 const userRoutes = require("./routes/users");
+const questionRoutes = require("./routes/questions");
+const answerRoutes = require("./routes/answers");
 
 //connect to Mongodb database
 const mongoose = require("mongoose");
@@ -25,6 +27,8 @@ app.use(cookieParser());
 app.use(express.static(join(__dirname, "public")));
 
 app.use("/api/users", userRoutes);
+app.use("/api/questions", questionRoutes);
+app.use("/api/answers", answerRoutes);
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(join(__dirname, "client/build")));
