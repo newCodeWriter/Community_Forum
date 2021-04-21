@@ -39,7 +39,7 @@ Bcrypt <br/>
 
 - user can login with either username or email
 - dashboard is restricted to registered users
-- notification 5 min prior to automatic logout
+- snackbar notification 5 min prior to automatic logout (pending)
 - user can update/delete answers and questions they post
 - user can change username, email and/or password
 - user can delete account
