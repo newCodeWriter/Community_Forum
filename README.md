@@ -1,7 +1,7 @@
 <!-- @format -->
 # MathQue
 
-MathQue is a web application that lets users register and log in to a forum where they can ask and answer questions on select math topics. This app utilizes context for state management, React Router for navigation, Express for server side API calls, and Mongodb for database management.
+MathQue is a web application that lets users register and log in to a forum where they can ask and answer questions on select math topics.
 
 ## Contributors
 
