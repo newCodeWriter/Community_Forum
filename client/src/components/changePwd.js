@@ -1,21 +1,18 @@
 /** @format */
 
 import React, { useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, FormControl, Form } from "react-bootstrap";
 import axios from "axios";
-import { useStateContext } from "../context/context";
 
-const ChangePwd = () => {
-	const [oldPwd, setOldPwd] = useState("");
+const ChangePwd = ({ update }) => {
+	const [currentPwd, setCurrentPwd] = useState("");
 	const [newPwd, setNewPwd] = useState("");
 	const [confirmPwd, setConfirmPwd] = useState("");
 	const [pwdError, setPwdError] = useState("");
 	const [pwdTestError, setPwdTestError] = useState(false);
 
-	const { user } = useStateContext();
-
-	const handleOldPwd = (event) => {
-		setOldPwd(event.target.value);
+	const handleCurrentPwd = (event) => {
+		setCurrentPwd(event.target.value);
 		setPwdError("");
 	};
 	const handleNewPwd = (event) => {
@@ -28,9 +25,9 @@ const ChangePwd = () => {
 		setPwdError("");
 	};
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
-		const oldPassword = oldPwd.trim();
+		const currentPassword = currentPwd.trim();
 		const newPassword = newPwd.trim();
 		const confirmPassword = confirmPwd.trim();
 		const pattern = new RegExp(
@@ -38,36 +35,33 @@ const ChangePwd = () => {
 		);
 		const pwdTest = pattern.test(newPassword);
 
-		if (!newPassword || !oldPassword || !confirmPassword) {
+		if (!newPassword || !currentPassword || !confirmPassword) {
 			setPwdError("A value is required for each field.");
 		} else if (
 			pwdTest &&
-			oldPassword !== newPassword &&
+			currentPassword !== newPassword &&
 			newPassword === confirmPassword
 		) {
 			const updatePwd = {
-				user: user.name,
-				oldPwd: oldPassword,
+				currentPwd: currentPassword,
 				newPwd: newPassword,
 			};
-
-			axios
-				.put(`/update/password`, updatePwd)
-				.then((res) => {
-					if (res.data === "wrong password") {
-						setPwdError("You have entered an incorrect password.");
-					} else {
-						setOldPwd("");
-						setNewPwd("");
-						setConfirmPwd("");
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-				});
+			try {
+				const response = await axios.put(`/api/users/update/password`, updatePwd);
+				if (response.data === "wrong password") {
+					setPwdError("You have entered an incorrect password.");
+				} else {
+					setCurrentPwd("");
+					setNewPwd("");
+					setConfirmPwd("");
+					update();
+				}
+			} catch (err) {
+				console.error(err.message);
+			}
 		} else if (!pwdTest) {
 			setPwdTestError(true);
-		} else if (oldPwd === newPwd) {
+		} else if (currentPwd === newPwd) {
 			setPwdError("Your new password matches your old password.");
 		} else {
 			setPwdError("Your passwords do not match.");
@@ -76,38 +70,33 @@ const ChangePwd = () => {
 
 	return (
 		<Form id="pwd-form">
-			<Form.Group>
-				<Form.Label>Current Password:</Form.Label>
-				<Form.Control
-					type="password"
-					name="oldPwd"
-					id="oldPwd"
-					className="mb-3"
-					placeholder="Old Password"
-					onChange={handleOldPwd}
-					value={oldPwd}
-				/>
-				<Form.Label>New Password:</Form.Label>
-				<Form.Control
-					type="password"
-					name="newPwd"
-					id="newPwd"
-					className="mb-3"
-					placeholder="New Password"
-					onChange={handleNewPwd}
-					value={newPwd}
-				/>
-				<Form.Label>Confirm Password:</Form.Label>
-				<Form.Control
-					type="password"
-					name="conPwd"
-					id="conPwd"
-					placeholder="Confirm Password"
-					onChange={handleConfirmPwd}
-					value={confirmPwd}
-				/>
-				<div className="text-danger small">{pwdError}</div>
-				{pwdTestError && (
+			<FormControl
+				placeholder="Enter Current Password"
+				id="currentPassword"
+				onChange={handleCurrentPwd}
+				value={currentPwd}
+				className="mb-1 acct-form"
+				type="password"
+			/>
+			<FormControl
+				placeholder="New Password"
+				id="newPassword"
+				onChange={handleNewPwd}
+				value={newPwd}
+				className="mb-1"
+				type="password"
+			/>
+			<FormControl
+				placeholder="Confirm Password"
+				id="confirmPassword"
+				onChange={handleConfirmPwd}
+				value={confirmPwd}
+				className="mb-1"
+				type="password"
+			/>
+			<div className="text-danger small">{pwdError}</div>
+			{pwdTestError && (
+				<>
 					<ul className="text-danger small errors">
 						Your new password must contain:
 						<li className="pwd-error">At least eight characters</li>
@@ -115,8 +104,8 @@ const ChangePwd = () => {
 						<li className="pwd-error">At least one number</li>
 						<li className="pwd-error">At least one special character</li>
 					</ul>
-				)}
-			</Form.Group>
+				</>
+			)}
 			<Button
 				variant="primary"
 				className="mt-3 mb-3"
