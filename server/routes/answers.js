@@ -5,6 +5,7 @@ const router = express.Router();
 const User = require("../models/User");
 const Question = require("../models/Question");
 const Answer = require("../models/Answer");
+const auth = require("../middleware/authentication");
 
 const newAnswer = async (req, res) => {
 	const { userId, questionId, answer } = req.body;
@@ -20,15 +21,11 @@ const newAnswer = async (req, res) => {
 	addAnswer
 		.save()
 		.then((answer) => {
-			user.responses.push(addAnswer._id);
-			res.status(200).send(
-				answer
-					.populate({
-						path: "user",
-						select: "username -_id",
-					})
-					.execPopulate()
-			);
+			user.answers.push(answer._id);
+			user.save();
+			question.answers.push(answer._id);
+			question.save();
+			res.status(200).end();
 		})
 		.catch((err) => {
 			throw err;
@@ -44,24 +41,17 @@ const updateAnswer = async (req, res) => {
 	answer.created = `${date.toDateString()} at ${date.toLocaleTimeString()}`;
 	answer
 		.save()
-		.then((updatedAnswer) => {
-			res
-				.status(200)
-				.send(
-					updatedAnswer
-						.populate({ path: "user", select: "username -_id" })
-						.execPopulate()
-				);
+		.then(() => {
+			res.status(200).end();
 		})
 		.catch((err) => {
-			throw err;
+			console.error(err.message);
 		});
 };
 
 const deleteAnswer = async (req, res) => {
 	const { id } = req.params;
-	Answer
-		.findByIdAndDelete(id)
+	Answer.findByIdAndDelete(id)
 		.then(() => {
 			res.json({ success: "answer deleted" });
 		})
@@ -70,10 +60,10 @@ const deleteAnswer = async (req, res) => {
 		});
 };
 
-router.post("/answer", newAnswer);
+router.post("/answer", auth, newAnswer);
 
-router.put("/update/answer/:answerId", updateAnswer);
+router.put("/update/answer/:answerId", auth, updateAnswer);
 
-router.delete("/delete/answer/:id", deleteAnswer);
+router.delete("/delete/answer/:id", auth, deleteAnswer);
 
 module.exports = router;

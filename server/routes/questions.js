@@ -5,11 +5,11 @@ const router = express.Router();
 const User = require("../models/User");
 const Question = require("../models/Question");
 const Answer = require("../models/Answer");
+const auth = require("../middleware/authentication");
 
 const categoryInfo = (req, res) => {
 	const { category } = req.params;
-	Question
-		.find({ category: category })
+	Question.find({ category: category })
 		.populate({ path: "user", select: "username -_id" })
 		.then((questions) => {
 			res.status(200).send(questions);
@@ -29,18 +29,15 @@ const newQuestion = async (req, res) => {
 		user: user._id,
 		created: `${date.toDateString()} at ${date.toLocaleTimeString()}`,
 	});
+	if (!question.endsWith("?")) {
+		return res.status(401).send("not a valid question");
+	}
 	addQuestion
 		.save()
-		.then((question) => {
+		.then(() => {
 			user.questions.push(addQuestion._id);
-			res.status(200).send(
-				question
-					.populate({
-						path: "user",
-						select: "username -_id",
-					})
-					.execPopulate()
-			);
+			user.save()
+			res.status(200).end();
 		})
 		.catch((err) => {
 			throw err;
@@ -49,8 +46,7 @@ const newQuestion = async (req, res) => {
 
 const getPost = (req, res) => {
 	const { questionId } = req.params;
-	Question
-		.findOne({ _id: questionId })
+	Question.findOne({ _id: questionId })
 		.populate({ path: "user", select: "username -_id" })
 		.populate({
 			path: "answers",
@@ -74,15 +70,8 @@ const updateQuestion = async (req, res) => {
 	question
 		.save()
 		.then((updatedQuestion) => {
-			res.status(200).send(
-				updatedQuestion
-					.populate({ path: "user", select: "username -_id" })
-					.populate({
-						path: "answers",
-						populate: { path: "user", select: "username -_id" },
-					})
-					.execPopulate()
-			);
+			const { question, user, created } = updatedQuestion;
+			res.status(200).json({ question, user, created });
 		})
 		.catch((err) => {
 			throw err;
@@ -91,11 +80,9 @@ const updateQuestion = async (req, res) => {
 
 const deleteQuestion = (req, res) => {
 	const { id } = req.params;
-	Question
-		.findByIdAndDelete(id)
+	Question.findByIdAndDelete(id)
 		.then(() => {
-			Answer
-				.deleteMany({ question: id })
+			Answer.deleteMany({ question: id })
 				.then(() => {
 					res.json({ success: "question deleted" });
 				})
@@ -104,18 +91,18 @@ const deleteQuestion = (req, res) => {
 				});
 		})
 		.catch((err) => {
-			console.error(err);
+			throw err;
 		});
 };
 
-router.get("/category/:category", categoryInfo);
+router.get("/category/:category", auth, categoryInfo);
 
-router.get("/post/:questionId", getPost);
+router.get("/post/:questionId", auth, getPost);
 
-router.post("/question", newQuestion);
+router.post("/question", auth, newQuestion);
 
-router.put("/update/question/:questionId", updateQuestion);
+router.put("/update/question/:questionId", auth, updateQuestion);
 
-router.delete("/delete/question/:id", deleteQuestion);
+router.delete("/delete/question/:id", auth, deleteQuestion);
 
 module.exports = router;

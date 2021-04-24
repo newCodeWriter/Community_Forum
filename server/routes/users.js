@@ -110,7 +110,7 @@ const getLogin = (req, res) => {
 };
 
 const checkName = (req, res) => {
-	const { newName } = req.body;
+	const { newName } = req.query;
 	User.findOne({ username: newName })
 		.select("username")
 		.then((user) => {
@@ -123,13 +123,16 @@ const checkName = (req, res) => {
 };
 
 const checkEmail = (req, res) => {
-	const { email } = req.body;
+	const { email } = req.query;
 	User.findOne({ email: email })
 		.select("email")
 		.then((user) => {
 			if (user) {
+				console.log('not available')
 				return res.send("not available");
 			} else {
+				console.log('ok')
+				console.log(user)
 				return res.send("ok");
 			}
 		});
@@ -137,16 +140,12 @@ const checkEmail = (req, res) => {
 
 const updateUserName = (req, res) => {
 	const { name } = req.body;
-	const user = response.locals.user;
+	const user = res.locals.user;
 	user.username = name;
 	user
 		.save()
-		.then((updatedUser) => {
-			const { _id, username, email } = updatedUser;
-			res.json({
-				success: "username updated",
-				user: { id: _id, username, email },
-			});
+		.then(() => {
+			res.status(200).end();
 		})
 		.catch((err) => {
 			res.status(400).json({ error: err.message });
@@ -154,27 +153,27 @@ const updateUserName = (req, res) => {
 };
 
 const updateEmail = (req, res) => {
-	const { email } = req.body;
+	const { currentEmail, newEmail } = req.body;
 	const user = res.locals.user;
-	user.email = email;
-	user
-		.save()
-		.then((updatedUser) => {
-			const { _id, username, email } = updatedUser;
-			res.status(200).json({
-				success: "email updated",
-				user: { id: _id, username, email },
+	if (currentEmail === user.email) {
+		user.email = newEmail;
+		user
+			.save()
+			.then(() => {
+				res.send("ok");
+			})
+			.catch((err) => {
+				res.status(400).json({ error: err.message });
 			});
-		})
-		.catch((err) => {
-			res.status(400).json({ error: err.message });
-		});
+	} else {
+		return res.send("This email is not associated with your account.");
+	}
 };
 
 const updatePassword = (req, res) => {
-	const { oldPwd, newPwd } = req.body;
+	const { currentPwd, newPwd } = req.body;
 	const user = res.locals.user;
-	bcrypt.compare(oldPwd, user.password, (error, match) => {
+	bcrypt.compare(currentPwd, user.password, (error, match) => {
 		if (error) throw error;
 		else {
 			if (match) {
@@ -184,14 +183,14 @@ const updatePassword = (req, res) => {
 					user
 						.save()
 						.then(() => {
-							return res.status(200);
+							return res.status(200).end();
 						})
 						.catch((err) => {
 							throw err;
 						});
 				});
 			}
-			return res.status(400).send("wrong password");
+			return res.send("wrong password");
 		}
 	});
 };
