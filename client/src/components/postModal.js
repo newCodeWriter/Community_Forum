@@ -25,7 +25,7 @@ const PostModal = ({ open, close, type, update }) => {
 	const handleAnswer = async () => {
 		const answer = text.trim().replace(/(\r\n|\r)/gm, "\n");
 		const data = {
-			userId: user,
+			userId: user.id,
 			questionId: type.answer.questionId,
 			answer: answer,
 		};
@@ -46,14 +46,14 @@ const PostModal = ({ open, close, type, update }) => {
 
 	const handleAnswerUpdate = async () => {
 		const original = type.updateAnswer.answer;
-		const update = text.trim();
-		if (update.length >= 5 && original !== update) {
-			const replace = update.replace(/(\r\n|\r)/gm, "\n");
+		const newAnswer = text.trim();
+		if (newAnswer.length >= 5 && original !== newAnswer) {
+			const replace = newAnswer.replace(/(\r\n|\r)/gm, "\n");
 			const data = { update: replace };
 
 			try {
 				const response = await axios.put(
-					`/api/answers/update/answer/${answer.id}`,
+					`/api/answers/update/answer/${type.updateAnswer.id}`,
 					data
 				);
 				if (response.status === 200) {
@@ -63,7 +63,7 @@ const PostModal = ({ open, close, type, update }) => {
 			} catch (err) {
 				console.error(err.message);
 			}
-		} else if (original === update) {
+		} else if (original === newAnswer) {
 			setError("You have made no changes. Please update or press cancel.");
 		} else {
 			setError("You must enter at least 5 characters.");
@@ -72,11 +72,11 @@ const PostModal = ({ open, close, type, update }) => {
 
 	const handleQuestionUpdate = async () => {
 		const original = type.question.question;
-		const update = text.trim();
-		const data = { update: update };
-		if (original === update) {
+		const newQuestion = text.trim();
+		const data = { update: newQuestion };
+		if (original === newQuestion) {
 			setError("You have made no changes. Please update or press cancel.");
-		} else if (update.endsWith("?") && update.length >= 10) {
+		} else if (newQuestion.endsWith("?") && newQuestion.length >= 10) {
 			try {
 				const response = await axios.put(
 					`/api/questions/update/question/${type.question.id}`,
@@ -97,7 +97,7 @@ const PostModal = ({ open, close, type, update }) => {
 	};
 
 	return (
-		<Modal open={open} onHide={handleClose} centered>
+		<Modal show={open} onHide={handleClose} centered>
 			<Modal.Body>
 				<>
 					<label htmlFor="modal" className="d-block mb-3">

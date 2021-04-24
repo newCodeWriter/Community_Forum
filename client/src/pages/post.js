@@ -13,7 +13,7 @@ const Post = () => {
 	const [answers, setAnswers] = useState([]);
 	const [modal, setModal] = useState(false);
 	const [modalType, setModalType] = useState({});
-	const { user, postData } = useStateContext();
+	const { user } = useStateContext();
 	const dispatch = useDispatchContext();
 
 	const { questionId } = useParams();
@@ -34,15 +34,13 @@ const Post = () => {
 	};
 
 	useEffect(() => {
-		if (postData) {
 			fetchAnswers();
-			console.log("hit it");
-		}
-	}, [postData]);
+		// eslint-disable-next-line
+	}, []);
 
 	const showAnswer = () => {
 		setModalType({
-			answer: { questionId: question._id, question: question.question },
+			answer: { questionId: questionId, question: question.question },
 		});
 		setModal(true);
 	};
@@ -64,7 +62,7 @@ const Post = () => {
 	const deleteQuestion = async () => {
 		try {
 			const response = await axios.delete(
-				`/api/questions/delete/question/${question.id}`
+				`/api/questions/delete/question/${questionId}`
 			);
 			if (response.data.success) {
 				history.goBack(-1);
@@ -77,7 +75,7 @@ const Post = () => {
 	const handleUpdate = () => fetchAnswers();
 
 	return (
-		<div className="set-width mx-auto">
+		<div className="set-width">
 			<div className="row">
 				<div className="col-12 col-lg-10">
 					<h4>{question.question}</h4>
@@ -111,7 +109,7 @@ const Post = () => {
 				</div>
 			</div>
 			<div className="row mt-4 w-100">
-				{answers.length && <div className="col mb-2">Answers:</div>}
+				{answers.length > 0 && <div className="col mb-2">Answers:</div>}
 			</div>
 			{answers.map((answer) => (
 				<Answer
