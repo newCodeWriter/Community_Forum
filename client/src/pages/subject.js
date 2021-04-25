@@ -12,21 +12,38 @@ const Subject = () => {
 	const { url } = useRouteMatch();
 
 	const fetchQuestions = async () => {
-		try {
-			const response = await axios.get(`/api/questions/category/${subjectId}`);
-			setQuestions([...response.data]);
-		} catch (err) {
-			console.error(err);
+		const subject = localStorage.getItem(subjectId);
+		if (subject && JSON.parse(subject).expiration >= Date.now()) {
+			setQuestions([...JSON.parse(subject).data]);
+			console.log('this is cached data')
+		} else {
+			try {
+				const response = await axios.get(
+					`/api/questions/category/${subjectId}`
+				);
+				// cache API response
+				localStorage.setItem(
+					subjectId,
+					JSON.stringify({
+						expiration: Date.now() + 120000,
+						data: [...response.data],
+					})
+				);
+				setQuestions([...response.data]);
+			} catch (err) {
+				console.error(err);
+			}
 		}
 	};
 	const newQuestion = () => history.push(`${url}/question`);
 
 	useEffect(() => {
 		fetchQuestions();
+		// eslint-disable-next-line
 	}, [subjectId]);
 
 	return (
-		<div className="set-width mx-auto">
+		<div className="set-width">
 			<Button
 				variant="primary"
 				className="mb-4 pl-3 pr-3 pt-2 pb-2"
@@ -35,10 +52,7 @@ const Subject = () => {
 				New Question?
 			</Button>
 			{questions.map((q) => (
-				<Link
-					key={`question_${q._id}`}
-					to={`${url}/${q._id}`}
-				>
+				<Link key={`question_${q._id}`} to={`${url}/${q._id}`}>
 					<div
 						id={q._id}
 						className="border border-light bg-light d-block mb-3 p-3 subject-container shadow"
