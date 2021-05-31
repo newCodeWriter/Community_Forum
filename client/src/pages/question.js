@@ -1,6 +1,6 @@
 /** @format */
 
-import React from "react";
+import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
 import { useParams, useHistory } from "react-router-dom";
 import { useStateContext } from "../context/context";
@@ -18,7 +18,7 @@ const Question = () => {
 	const handleForm = async (event) => {
 		event.preventDefault();
 		const data = {
-			user: user.id,
+			userId: user.id,
 			category: subjectId,
 			question: question,
 		};
@@ -46,7 +46,7 @@ const Question = () => {
 	};
 
 	return (
-		<div className="set-width mx-auto">
+		<div className="set-width">
 			<form id="question_form">
 				<div className="row mt-3 text-muted">
 					<div className="col">

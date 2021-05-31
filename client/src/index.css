@@ -10,6 +10,41 @@ body,
 #root {
 	max-height: 100vh;
 }
+#content {
+	padding-top: 2em;
+	position: relative;
+}
+#alert {
+	position: absolute;
+	top: 15;
+	right: 15;
+}
+#acct {
+	width: 60%;
+}
+.acct-font {
+	font-size: 1rem;
+}
+.acct-form {
+	border-left: none;
+	border-right: none;
+	border-top: none;
+	padding-left: 0;
+	border-radius: 0;
+}
+.acct-form:focus {
+	box-shadow: none;
+	border-color: #ced4da !important;
+}
+ul {
+	list-style-position: inside;
+}
+#profile-icon {
+	justify-content: center;
+}
+.fa-user-circle::before {
+	cursor: auto;
+}
 .bg-image {
 	background-image: url("../src/assets/mathbg.jpg");
 	height: 100vh;
@@ -86,10 +121,22 @@ a {
 	.source {
 		font-size: 0.85rem !important;
 	}
+	#acct {
+		width: 100%;
+	}
+	#side-menu {
+		padding-right: 0 !important;
+	}
+	#content {
+		padding-left: 2em !important;
+	}
 }
-@media (min-width: 767px) {
-	#acct-chg {
-		width: 50% !important;
+@media (min-width: 577px) and (max-width: 766px) {
+	#acct {
+		width: 95%;
+	}
+	.acct-font {
+		font-size: 0.8rem;
 	}
 }
 @media (max-width: 767px) {
@@ -99,12 +146,6 @@ a {
 	.mq-font {
 		font-size: 0.75rem;
 	}
-	#acct-chg {
-		width: 75% !important;
-	}
-	.acct-font {
-		font-size: 1.3rem;
-	}
 	.home {
 		width: 80%;
 	}
@@ -112,6 +153,20 @@ a {
 @media (min-width: 768px) and (max-width: 900px) {
 	.home {
 		width: 70%;
+	}
+	#acct {
+		width: 85%;
+	}
+	.acct-font {
+		font-size: 0.9rem;
+	}
+}
+@media (min-width: 901px) and (max-width: 1150px) {
+	.home {
+		width: 55%;
+	}
+	#acct {
+		width: 75%;
 	}
 }
 @media (max-width: 991px) {
@@ -122,10 +177,5 @@ a {
 @media (max-width: 1039px) {
 	.source {
 		font-size: 1rem;
-	}
-}
-@media (min-width: 901px) and (max-width: 1150px) {
-	.home {
-		width: 55%;
 	}
 }
